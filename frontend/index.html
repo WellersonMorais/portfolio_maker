@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevFolio Builder - Protótipo de Alta Fidelidade (AWS Challenge)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;600;700&family=DM+Sans:wght@400;500;700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&family=Playfair+Display:wght@700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans overflow-x-hidden">
+
+    <header class="bg-slate-900 border-b border-slate-800 px-6 py-3 flex flex-wrap justify-between items-center gap-4 z-20">
+        <div class="flex items-center gap-3">
+            <div class="bg-amber-500 text-slate-950 px-2.5 py-1 rounded-md text-xs font-bold tracking-wider">DESAFIO AWS: DIA 1</div>
+            <h1 class="text-sm font-semibold text-slate-200">DevFolio Builder — Protótipo de Alta Fidelidade</h1>
+        </div>
+        <div class="flex items-center gap-4 text-xs text-slate-400">
+            <span><i class="fa-solid fa-server text-sky-400 mr-1.5"></i> Arquitetura: <strong class="text-slate-200">S3 + CloudFront</strong></span>
+            <span class="hidden sm:inline">|</span>
+            <span><i class="fa-solid fa-circle-check text-emerald-400 mr-1.5"></i> Nível: <strong class="text-slate-200">Avançado (CI/CD DevOps)</strong></span>
+        </div>
+    </header>
+
+    <main class="flex-1 flex flex-col lg:flex-row min-h-0">
+        <aside id="editor-panel" class="w-full lg:w-[420px] bg-slate-900 border-b lg:border-b-0 lg:border-r border-slate-800 p-6 flex flex-col gap-6 overflow-y-auto max-h-[50vh] lg:max-h-[calc(100vh-53px)] select-none z-10 bg-grid-pattern">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-wand-magic-sparkles text-amber-400 text-lg"></i>
+                    <h2 class="font-bold text-lg text-slate-200">Painel do Construtor</h2>
+                </div>
+                <button onclick="resetToDefault()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 rounded transition border border-slate-700">
+                    <i class="fa-solid fa-rotate-left mr-1"></i> Resetar
+                </button>
+            </div>
+
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col gap-3">
+                <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">1. Escolha o Template Base</label>
+                <div class="grid grid-cols-3 gap-2">
+                    <button onclick="setTemplate('wireframe')" id="btn-tmpl-wireframe" class="p-2 text-[11px] font-medium rounded-lg border bg-slate-900 border-amber-500/50 text-amber-400 hover:bg-slate-800 transition text-center leading-tight">
+                        Wireframe (Ilustrado)
+                    </button>
+                    <button onclick="setTemplate('tech')" id="btn-tmpl-tech" class="p-2 text-[11px] font-medium rounded-lg border bg-slate-900 border-slate-800 text-slate-400 hover:bg-slate-800 transition text-center leading-tight">
+                        Modern Tech
+                    </button>
+                    <button onclick="setTemplate('minimal')" id="btn-tmpl-minimal" class="p-2 text-[11px] font-medium rounded-lg border bg-slate-900 border-slate-800 text-slate-400 hover:bg-slate-800 transition text-center leading-tight">
+                        Minimalista
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col gap-4">
+                <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">2. Personalização Visual</label>
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <span class="text-[10px] text-slate-400 block mb-1">Primária</span>
+                        <div class="flex gap-1">
+                            <input type="color" id="primary-color" value="#f59e0b" oninput="updateStyleVar('--primary-color', this.value)" class="w-7 h-7 rounded cursor-pointer bg-transparent border-0 p-0">
+                            <input type="text" id="primary-color-text" value="#f59e0b" oninput="updateStyleVar('--primary-color', this.value)" class="bg-slate-900 border border-slate-800 rounded px-1 text-[10px] w-full text-slate-300 uppercase">
+                        </div>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-400 block mb-1">Fundo</span>
+                        <div class="flex gap-1">
+                            <input type="color" id="bg-color" value="#0f172a" oninput="updateStyleVar('--bg-color', this.value)" class="w-7 h-7 rounded cursor-pointer bg-transparent border-0 p-0">
+                            <input type="text" id="bg-color-text" value="#0f172a" oninput="updateStyleVar('--bg-color', this.value)" class="bg-slate-900 border border-slate-800 rounded px-1 text-[10px] w-full text-slate-300 uppercase">
+                        </div>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-400 block mb-1">Texto</span>
+                        <div class="flex gap-1">
+                            <input type="color" id="text-color" value="#f1f5f9" oninput="updateStyleVar('--text-color', this.value)" class="w-7 h-7 rounded cursor-pointer bg-transparent border-0 p-0">
+                            <input type="text" id="text-color-text" value="#f1f5f9" oninput="updateStyleVar('--text-color', this.value)" class="bg-slate-900 border border-slate-800 rounded px-1 text-[10px] w-full text-slate-300 uppercase">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-3">
+                    <div>
+                        <span class="text-xs text-slate-400 block mb-1">Família da Fonte</span>
+                        <select id="font-family-select" onchange="updateStyleVar('--font-family', this.value)" class="w-full bg-slate-900 border border-slate-800 rounded p-2 text-xs text-slate-300">
+                            <option value="'Inter', sans-serif">Inter (Limpa e Moderna)</option>
+                            <option value="'Comfortaa', cursive">Comfortaa (Arredondada/Divertida)</option>
+                            <option value="'JetBrains Mono', monospace">JetBrains Mono (Tech/Geek)</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <span class="text-xs text-slate-400 block mb-1">Escala da Fonte</span>
+                            <input type="range" id="font-scale" min="0.8" max="1.3" step="0.05" value="1.0" oninput="updateStyleVar('--font-scale', this.value)" class="w-full accent-amber-500">
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 block mb-1">Bordas (Arredondado)</span>
+                            <input type="range" id="border-radius" min="0" max="24" step="2" value="12" oninput="updateStyleVar('--card-radius', this.value + 'px')" class="w-full accent-amber-500">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col gap-4">
+                <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">3. Editar Conteúdo</label>
+
+                <div>
+                    <span class="text-xs text-slate-400 block mb-1">Nome Principal</span>
+                    <input type="text" id="content-name" value="Wellerson Morais" oninput="updateContent('name', this.value)" class="w-full bg-slate-900 border border-slate-800 rounded p-2 text-xs text-slate-200">
+                </div>
+
+                <div>
+                    <span class="text-xs text-slate-400 block mb-1">Sobre Mim (Resumo Geral)</span>
+                    <textarea id="content-bio" oninput="updateContent('bio', this.value)" rows="2" class="w-full bg-slate-900 border border-slate-800 rounded p-2 text-xs text-slate-200 resize-none">Arquiteto de Nuvem & Desenvolvedor Full Stack apaixonado por criar portfólios elegantes usando tecnologia de ponta na AWS.</textarea>
+                </div>
+
+                <div class="border-t border-slate-800 pt-3">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs font-bold text-slate-400 uppercase">Especialidades & Experiências</span>
+                        <button onclick="promptAddTopic()" class="text-[10px] bg-emerald-600 hover:bg-emerald-500 text-white px-2 py-0.5 rounded font-semibold transition">
+                            <i class="fa-solid fa-plus mr-1"></i> Nova
+                        </button>
+                    </div>
+
+                    <div id="editor-topics-list" class="flex flex-col gap-2 max-h-48 overflow-y-auto pr-1"></div>
+                </div>
+
+                <div>
+                    <span class="text-xs font-bold text-slate-400 block mb-2">Visibilidade das Seções</span>
+                    <div class="flex flex-col gap-2">
+                        <label class="flex items-center justify-between text-xs text-slate-300 cursor-pointer p-1.5 hover:bg-slate-900 rounded">
+                            <span><i class="fa-solid fa-user-tie mr-2 text-indigo-400"></i> Sobre Mim</span>
+                            <input type="checkbox" id="chk-sec-about" checked onchange="toggleSection('about', this.checked)" class="accent-emerald-500">
+                        </label>
+                        <label class="flex items-center justify-between text-xs text-slate-300 cursor-pointer p-1.5 hover:bg-slate-900 rounded">
+                            <span><i class="fa-solid fa-code mr-2 text-sky-400"></i> Skills (Habilidades)</span>
+                            <input type="checkbox" id="chk-sec-skills" checked onchange="toggleSection('skills', this.checked)" class="accent-emerald-500">
+                        </label>
+                        <label class="flex items-center justify-between text-xs text-slate-300 cursor-pointer p-1.5 hover:bg-slate-900 rounded">
+                            <span><i class="fa-solid fa-award mr-2 text-amber-400"></i> Certificados</span>
+                            <input type="checkbox" id="chk-sec-certs" checked onchange="toggleSection('certs', this.checked)" class="accent-emerald-500">
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-2.5 mt-auto">
+                <button onclick="savePortfolioToCloud()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/20">
+                    <i class="fa-solid fa-floppy-disk"></i> Salvar na Nuvem
+                </button>
+                <button onclick="generateShareLink()" class="w-full bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-lg">
+                    <i class="fa-solid fa-share-nodes"></i> Gerar Link de Compartilhamento
+                </button>
+            </div>
+        </aside>
+
+        <section class="flex-1 bg-slate-950 p-6 flex flex-col gap-4 overflow-hidden">
+            <div class="bg-slate-900 rounded-2xl border border-slate-800 shadow-2xl flex flex-col overflow-hidden flex-1">
+                <div class="bg-slate-900/80 px-4 py-3 flex items-center justify-between gap-4 border-b border-slate-800">
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-rose-500 inline-block"></span>
+                        <span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span>
+                        <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>
+                    </div>
+
+                    <div class="flex-1 max-w-2xl bg-slate-950 border border-slate-800 rounded-lg py-1 px-3 flex items-center gap-2 text-xs text-slate-400 overflow-hidden">
+                        <i class="fa-solid fa-lock text-emerald-500 text-[10px]"></i>
+                        <span id="browser-url" class="truncate font-mono select-all">https://devfolio-builder-aws-challenge.s3-website.us-east-1.amazonaws.com</span>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <button onclick="togglePreviewMode()" id="btn-preview-mode" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 border border-slate-700">
+                            <i id="preview-icon" class="fa-solid fa-eye-slash"></i> <span id="preview-text">Preview Modo Usuário</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="portfolio-container" class="flex-1 overflow-y-auto p-6 md:p-8 bg-slate-950 transition-colors duration-300 relative">
+                    <div id="edit-indicator" class="absolute top-4 right-4 bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[10px] uppercase tracking-wider px-2 py-1 rounded font-bold z-10 animate-pulse flex items-center gap-1.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> Modo Edição (Interativo)
+                    </div>
+
+                    <div id="portfolio-canvas" class="max-w-3xl mx-auto p-6 md:p-8 rounded-xl bg-[var(--bg-color)] border border-slate-800/80 shadow-lg flex flex-col gap-6"
+                         style="--primary-color: #f59e0b; --bg-color: #0f172a; --text-color: #f1f5f9; --card-radius: 12px; --font-scale: 1.0; --font-family: 'Inter', sans-serif;">
+                        <div class="flex flex-col md:flex-row items-center gap-6 justify-between border-b border-slate-700/50 pb-6 relative group">
+                            <div class="flex items-center gap-4">
+                                <div class="relative">
+                                    <div class="w-20 h-20 rounded-[calc(var(--card-radius)*1.2)] overflow-hidden border-2 border-[var(--primary-color)] shadow-md bg-slate-800 flex items-center justify-center">
+                                        <i class="fa-solid fa-user-astronaut text-3xl text-slate-500" id="avatar-fallback"></i>
+                                        <img id="avatar-image" src="" class="hidden w-full h-full object-cover">
+                                    </div>
+                                    <button onclick="triggerAvatarUpload()" class="edit-control absolute -bottom-1 -right-1 bg-[var(--primary-color)] text-slate-950 w-6 h-6 rounded-full flex items-center justify-center hover:scale-105 transition shadow">
+                                        <i class="fa-solid fa-camera text-[10px]"></i>
+                                    </button>
+                                    <input type="file" id="avatar-file-input" class="hidden" accept="image/*" onchange="loadAvatar(event)">
+                                </div>
+
+                                <div class="text-center md:text-left">
+                                    <h2 id="view-name" class="text-3xl font-extrabold tracking-tight font-[var(--font-family)]" style="color: var(--text-color); font-size: calc(1.875rem * var(--font-scale));">
+                                        Wellerson Morais
+                                    </h2>
+                                    <p class="text-xs opacity-75 mt-1 font-[var(--font-family)]" style="color: var(--text-color);">
+                                        Portfólio Interativo AWS Developer
+                                    </p>
+                                </div>
+                            </div>
+
+                            <button onclick="generateShareLink()" class="bg-[var(--primary-color)] text-slate-950 font-bold px-4 py-2 rounded-[var(--card-radius)] text-xs hover:opacity-90 transition flex items-center gap-2 shadow">
+                                <i class="fa-solid fa-share-nodes"></i> SHARE
+                            </button>
+                        </div>
+
+                        <div id="sec-about" class="bg-slate-800/30 border border-slate-700/50 rounded-[var(--card-radius)] p-4 flex flex-col gap-1.5 interactive-card">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-xs font-bold uppercase tracking-wider text-[var(--primary-color)]">Sobre Mim</h3>
+                                <button onclick="toggleSection('about', false)" class="edit-control text-xs text-rose-500 hover:text-rose-400"><i class="fa-solid fa-xmark"></i></button>
+                            </div>
+                            <p id="view-bio" class="text-xs leading-relaxed font-[var(--font-family)] opacity-90" style="color: var(--text-color); font-size: calc(0.85rem * var(--font-scale));">
+                                Arquiteto de Nuvem & Desenvolvedor Full Stack apaixonado por criar portfólios elegantes usando tecnologia de ponta na AWS.
+                            </p>
+                        </div>
+
+                        <div class="flex flex-col gap-2">
+                            <div class="flex justify-between items-center">
+                                <span class="text-[10px] font-bold uppercase tracking-wider opacity-60">Especialidades (Clique para alterar o foco e a ilustração):</span>
+                                <button onclick="promptAddTopic()" class="edit-control bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] px-2 py-0.5 rounded hover:bg-emerald-500/30 transition flex items-center gap-1 font-semibold">
+                                    <i class="fa-solid fa-plus text-[9px]"></i> Add Especialidade
+                                </button>
+                            </div>
+                            <div id="view-role-container" class="flex flex-wrap gap-2 justify-center md:justify-start items-center"></div>
+                        </div>
+
+                        <div id="layout-grid-container" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
+                            <div id="sec-topic-exp" class="bg-slate-800/30 border border-slate-700/50 rounded-[var(--card-radius)] p-4 flex flex-col gap-2 interactive-card">
+                                <div class="flex justify-between items-center">
+                                    <h3 class="text-xs font-bold uppercase tracking-wider text-[var(--primary-color)] flex items-center gap-1.5">
+                                        <i class="fa-solid fa-lightbulb text-[11px]"></i>
+                                        <span id="topic-exp-title">Experiência Front-End</span>
+                                    </h3>
+                                </div>
+                                <p id="topic-exp-desc" class="text-xs leading-relaxed font-[var(--font-family)] opacity-90" style="color: var(--text-color); font-size: calc(0.8rem * var(--font-scale));">
+                                    Criação de interfaces dinâmicas e responsivas utilizando React, Tailwind CSS e TypeScript.
+                                </p>
+                            </div>
+
+                            <div id="sec-illustration" class="bg-slate-800/40 border-2 border-[var(--primary-color)] rounded-[var(--card-radius)] p-4 flex flex-col items-center justify-center text-center gap-3 relative overflow-hidden shadow-lg min-h-[180px] group">
+                                <span id="active-topic-badge" class="absolute top-2 left-2 bg-[var(--primary-color)] text-slate-950 font-bold text-[9px] px-2 py-0.5 rounded font-mono uppercase z-10">
+                                    FRONT
+                                </span>
+
+                                <button onclick="triggerTopicImageUpload()" class="edit-control absolute top-2 right-2 bg-[var(--primary-color)] text-slate-950 w-6 h-6 rounded-full flex items-center justify-center hover:scale-105 transition shadow z-10 opacity-0 group-hover:opacity-100">
+                                    <i class="fa-solid fa-image text-[10px]"></i>
+                                </button>
+                                <input type="file" id="topic-image-input" class="hidden" accept="image/*" onchange="loadTopicImage(event)">
+
+                                <div id="center-illustration-box" class="w-24 h-24 flex items-center justify-center transition-all duration-300 transform scale-100 hover:scale-105 relative"></div>
+
+                                <div class="text-[11px] font-semibold text-center font-[var(--font-family)] relative z-10" style="color: var(--text-color);">
+                                    <span id="illustration-caption">Especialista Front-End</span>
+                                </div>
+                            </div>
+
+                            <div id="sec-skills" class="bg-slate-800/30 border border-slate-700/50 rounded-[var(--card-radius)] p-4 flex flex-col gap-3 interactive-card">
+                                <div class="flex justify-between items-center">
+                                    <h3 class="text-xs font-bold uppercase tracking-wider text-[var(--primary-color)]">Habilidades</h3>
+                                    <div class="flex gap-2">
+                                        <button onclick="promptAddSkill()" class="edit-control bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] px-1.5 py-0.5 rounded hover:bg-emerald-500/30 transition">
+                                            <i class="fa-solid fa-plus"></i>
+                                        </button>
+                                        <button onclick="toggleSection('skills', false)" class="edit-control text-xs text-rose-500 hover:text-rose-400"><i class="fa-solid fa-xmark"></i></button>
+                                    </div>
+                                </div>
+
+                                <div id="skills-list" class="flex flex-wrap gap-1.5"></div>
+                            </div>
+                        </div>
+
+                        <div id="sec-certs" class="flex flex-col gap-3 pt-2">
+                            <div class="flex justify-between items-center border-b border-slate-700/40 pb-2">
+                                <h3 class="text-xs font-bold uppercase tracking-wider text-[var(--primary-color)]">Certificados Oficiais</h3>
+                                <div class="flex gap-2">
+                                    <button onclick="promptAddCert()" class="edit-control bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] px-2 py-0.5 rounded hover:bg-emerald-500/30 transition flex items-center gap-1">
+                                        <i class="fa-solid fa-plus"></i> Add Cert
+                                    </button>
+                                    <button onclick="toggleSection('certs', false)" class="edit-control text-xs text-rose-500 hover:text-rose-400"><i class="fa-solid fa-xmark"></i></button>
+                                </div>
+                            </div>
+
+                            <div id="certs-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
+                        </div>
+
+                        <div class="mt-2 pt-4 border-t border-slate-800 text-center text-[10px] opacity-60">
+                            Hospedado com segurança no Amazon CloudFront via CDN global.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="share-modal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-md w-full flex flex-col gap-4 shadow-2xl">
+            <div class="flex justify-between items-center">
+                <h3 class="text-md font-bold text-slate-200 flex items-center gap-2"><i class="fa-solid fa-cloud-arrow-up text-sky-400"></i> Portfólio Exportado!</h3>
+                <button onclick="closeShareModal()" class="text-slate-400 hover:text-slate-200"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <p class="text-xs text-slate-300">
+                Seu portfólio customizado foi convertido em uma URL leve. Copie o link abaixo para compartilhar!
+            </p>
+            <div class="flex gap-2 bg-slate-950 border border-slate-800 rounded-lg p-2 items-center">
+                <input type="text" id="share-url-input" class="bg-transparent text-xs text-slate-300 w-full focus:outline-none truncate font-mono select-all">
+                <button onclick="copyShareUrl()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-md text-xs font-semibold transition flex items-center gap-1">
+                    <i class="fa-solid fa-copy"></i> Copiar
+                </button>
+            </div>
+            <span id="copy-success-msg" class="text-emerald-400 text-xs text-center hidden"><i class="fa-solid fa-circle-check"></i> Link copiado com sucesso!</span>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
