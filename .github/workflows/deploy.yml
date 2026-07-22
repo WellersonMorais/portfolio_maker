@@ -1,0 +1,23 @@
+steps:
+# Passo 1: O GitHub baixa o código do seu repositório para o servidor dele
+- name: Checkout Repo
+  uses: actions/checkout@v4
+
+# Passo 2: O GitHub usa as chaves secretas para se autenticar na sua conta AWS
+- name: Configure AWS Credentials
+  uses: aws-actions/configure-aws-credentials@v4
+  with:
+    aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    aws-region: us-east-1 # Mude se o seu bucket não estiver em N. Virginia
+
+# Passo 3: Sincroniza os arquivos locais com o Bucket S3
+# A flag --delete remove do S3 arquivos que você deletou no seu código
+- name: Sync files to S3 Bucket
+  run: |
+    aws s3 sync . s3://${{ secrets.S3_BUCKET_NAME }} --delete --exclude ".git/*" --exclude ".github/*"
+
+# Passo 4: Força a Invalidação do Cache no CloudFront
+- name: Invalidate CloudFront Cache
+  run: |
+    aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
