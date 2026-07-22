@@ -22,7 +22,7 @@ jobs:
 
       - name: Sync files to S3 Bucket
         run: |
-          aws s3 sync ./front s3://${{ secrets.S3_BUCKET_NAME }} \
+          aws s3 sync ./frontend s3://${{ secrets.S3_BUCKET_NAME }} \
             --delete
 
       - name: Invalidate CloudFront Cache
