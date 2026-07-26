@@ -1,0 +1,39 @@
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+@media (min-width: 768px) {
+    .main-layout {
+        flex-direction: row;
+    }
+
+    .editor-panel {
+        width: 420px;
+        border-bottom: 0;
+        border-right: 1px solid #1e293b;
+        max-height: calc(100vh - 53px);
+    }
+
+    .hero-copy {
+        text-align: left;
+    }
+
+    .topic-list {
+        justify-content: flex-start;
+    }
+
+    .layout-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .certs-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1024px) {
+    .editor-panel {
+        width: 420px;
+    }
+}

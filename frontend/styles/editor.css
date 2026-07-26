@@ -1,0 +1,257 @@
+.panel-icon {
+    color: #f59e0b;
+    font-size: 1.1rem;
+}
+
+.panel-header h2 {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #e2e8f0;
+}
+
+.panel-action-btn,
+.add-btn,
+.action-btn,
+.preview-toggle-btn,
+.share-btn,
+.skill-add-btn,
+.cert-add-btn,
+.template-btn,
+.copy-btn,
+.modal__close,
+.section-card__close {
+    border: 1px solid transparent;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.panel-action-btn {
+    font-size: 0.75rem;
+    background: #1e293b;
+    color: #cbd5e1;
+    padding: 6px 8px;
+    border-color: #334155;
+}
+
+.panel-action-btn:hover,
+.template-btn:hover,
+.action-btn:hover,
+.preview-toggle-btn:hover,
+.share-btn:hover,
+.skill-add-btn:hover,
+.cert-add-btn:hover,
+.add-btn:hover,
+.copy-btn:hover,
+.modal__close:hover,
+.section-card__close:hover {
+    background-color: #334155;
+}
+
+.panel-section,
+.section-card,
+.certs-section,
+.preview-frame,
+.modal__content {
+    background: #020617;
+    border: 1px solid #1e293b;
+    border-radius: 16px;
+}
+
+.panel-section {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.section-title,
+.visibility-title,
+.section-divider__title,
+.topics-section__header span {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #94a3b8;
+}
+
+.template-nav {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.template-btn {
+    padding: 8px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-align: center;
+    line-height: 1.3;
+    background: #0f172a;
+    border-color: #334155;
+    color: #94a3b8;
+}
+
+.template-btn--active {
+    border-color: rgba(245, 158, 11, 0.5);
+    color: #f59e0b;
+    background: #111827;
+}
+
+.color-fieldset,
+.control-fieldset,
+.visibility-fieldset {
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+
+.color-fieldset {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.color-control {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.field-label {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.color-picker {
+    width: 28px;
+    height: 28px;
+    border: 0;
+    padding: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.field-input,
+.field-select,
+textarea {
+    width: 100%;
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+    padding: 8px;
+    color: #e2e8f0;
+    font-size: 0.75rem;
+}
+
+.field-input--textarea {
+    resize: none;
+}
+
+.control-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.slider {
+    width: 100%;
+    accent-color: #f59e0b;
+}
+
+.section-divider {
+    border-top: 1px solid #1e293b;
+    padding-top: 12px;
+}
+
+.topic-editor-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 192px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.topic-editor-list > div {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.topic-editor-list span {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #f59e0b;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.topic-editor-list textarea {
+    min-height: 48px;
+}
+
+.toggle-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.toggle-item {
+    justify-content: space-between;
+    padding: 6px 8px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    color: #e2e8f0;
+    cursor: pointer;
+}
+
+.toggle-item:hover {
+    background: #0f172a;
+}
+
+.toggle-item i {
+    margin-right: 8px;
+}
+
+.toggle-item input {
+    accent-color: #10b981;
+}
+
+.action-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: auto;
+}
+
+.action-btn {
+    width: 100%;
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.action-btn--primary {
+    background: #059669;
+    color: #fff;
+    box-shadow: 0 10px 20px rgba(2, 6, 23, 0.3);
+}
+
+.action-btn--secondary {
+    background: linear-gradient(90deg, #4f46e5, #0284c7);
+    color: #fff;
+}

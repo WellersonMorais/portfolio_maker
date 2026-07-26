@@ -1,73 +1,3 @@
-const TOPIC_ILLUSTRATIONS = {
-    FRONT: {
-        caption: 'Desenvolvedor Front-End UI/UX',
-        svg: `<svg viewBox="0 0 100 100" class="w-full h-full fill-none stroke-current text-[var(--primary-color)] stroke-2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="50" cy="25" r="12" />
-            <line x1="50" y1="37" x2="50" y2="65" />
-            <line x1="50" y1="45" x2="30" y2="55" />
-            <line x1="50" y1="45" x2="70" y2="55" />
-            <line x1="50" y1="65" x2="35" y2="90" />
-            <line x1="50" y1="65" x2="65" y2="90" />
-            <rect x="20" y="50" width="25" height="18" rx="2" class="fill-slate-900/80 stroke-current" />
-            <polyline points="26,56 22,59 26,62" />
-            <polyline points="38,56 42,59 38,62" />
-        </svg>`
-    },
-    BACK: {
-        caption: 'Arquiteto Back-End & APIs',
-        svg: `<svg viewBox="0 0 100 100" class="w-full h-full fill-none stroke-current text-[var(--primary-color)] stroke-2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="30" cy="25" r="10" />
-            <line x1="30" y1="35" x2="30" y2="65" />
-            <line x1="30" y1="45" x2="55" y2="40" />
-            <line x1="30" y1="65" x2="18" y2="90" />
-            <line x1="30" y1="65" x2="42" y2="90" />
-            <rect x="55" y="25" width="35" height="15" rx="3" class="fill-slate-900/80 stroke-current" />
-            <rect x="55" y="45" width="35" height="15" rx="3" class="fill-slate-900/80 stroke-current" />
-            <rect x="55" y="65" width="35" height="15" rx="3" class="fill-slate-900/80 stroke-current" />
-            <circle cx="62" cy="32.5" r="1.5" class="fill-current" />
-            <circle cx="62" cy="52.5" r="1.5" class="fill-current" />
-            <circle cx="62" cy="72.5" r="1.5" class="fill-current" />
-        </svg>`
-    },
-    DESIGN: {
-        caption: 'Designer de Produtos Digitais',
-        svg: `<svg viewBox="0 0 100 100" class="w-full h-full fill-none stroke-current text-[var(--primary-color)] stroke-2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="50" cy="22" r="10" />
-            <line x1="50" y1="32" x2="50" y2="60" />
-            <line x1="50" y1="40" x2="25" y2="30" />
-            <line x1="50" y1="40" x2="75" y2="30" />
-            <line x1="50" y1="60" x2="35" y2="88" />
-            <line x1="50" y1="60" x2="65" y2="88" />
-            <path d="M 20 25 C 20 15, 35 15, 35 25 C 35 35, 20 35, 20 25 Z" class="fill-slate-900/80 stroke-current" />
-            <circle cx="25" cy="22" r="2" class="fill-current" />
-            <circle cx="30" cy="28" r="2" class="fill-current" />
-        </svg>`
-    },
-    AWS: {
-        caption: 'Especialista em Nuvem AWS',
-        svg: `<svg viewBox="0 0 100 100" class="w-full h-full fill-none stroke-current text-[var(--primary-color)] stroke-2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M 25 60 A 18 18 0 0 1 40 32 A 22 22 0 0 1 80 40 A 16 16 0 0 1 75 60 Z" class="fill-slate-900/80 stroke-current" />
-            <circle cx="50" cy="70" r="8" />
-            <line x1="50" y1="78" x2="50" y2="92" />
-            <line x1="50" y1="82" x2="38" y2="88" />
-            <line x1="50" y1="82" x2="62" y2="88" />
-            <line x1="50" y1="60" x2="50" y2="48" />
-        </svg>`
-    },
-    DEFAULT: {
-        caption: 'Especialista Técnico',
-        svg: `<svg viewBox="0 0 100 100" class="w-full h-full fill-none stroke-current text-[var(--primary-color)] stroke-2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="50" cy="30" r="14" />
-            <line x1="50" y1="44" x2="50" y2="70" />
-            <line x1="50" y1="52" x2="25" y2="40" />
-            <line x1="50" y1="52" x2="75" y2="40" />
-            <line x1="50" y1="70" x2="32" y2="92" />
-            <line x1="50" y1="70" x2="68" y2="92" />
-            <polygon points="50,18 53,26 62,26 55,31 58,39 50,34 42,39 45,31 38,26 47,26" class="fill-amber-400 stroke-none" />
-        </svg>`
-    }
-};
-
 const DEFAULT_STATE = {
     template: 'wireframe',
     primaryColor: '#f59e0b',
@@ -95,9 +25,9 @@ const DEFAULT_STATE = {
     },
     skills: ['JavaScript', 'TypeScript', 'Vite', 'React', 'HTML', 'CSS', 'Node.js', 'AWS S3', 'CloudFront'],
     certs: [
-        { name: 'AWS Cloud Practitioner', type: 'PDF' },
-        { name: 'AWS Solutions Architect', type: 'PDF' },
-        { name: 'Developer Associate', type: 'IMG' }
+        { name: 'AWS Cloud Practitioner', type: 'PDF', topic: 'AWS' },
+        { name: 'AWS Solutions Architect', type: 'PDF', topic: 'AWS' },
+        { name: 'Developer Associate', type: 'IMG', topic: 'BACK' }
     ]
 };
 
@@ -150,10 +80,8 @@ function syncUIWithState() {
 
     if (state.content.avatar) {
         const img = document.getElementById('avatar-image');
-        const fallback = document.getElementById('avatar-fallback');
         img.src = state.content.avatar;
         img.classList.remove('hidden');
-        fallback.classList.add('hidden');
     }
 
     renderEditorTopicsList();
@@ -168,19 +96,19 @@ function renderEditorTopicsList() {
 
     state.topics.forEach((topic) => {
         const item = document.createElement('div');
-        item.className = 'bg-slate-900 border border-slate-800 rounded p-2 flex flex-col gap-1.5';
+        item.className = 'topic-editor-card';
 
         const header = document.createElement('div');
-        header.className = 'flex justify-between items-center';
+        header.className = 'topic-editor-card__header';
 
         const title = document.createElement('span');
-        title.className = 'text-[11px] font-bold text-amber-400 font-mono';
+        title.className = 'topic-editor-card__title';
         title.innerText = topic.name;
         header.appendChild(title);
 
         if (state.topics.length > 1) {
             const delBtn = document.createElement('button');
-            delBtn.className = 'text-rose-400 hover:text-rose-300 text-[10px]';
+            delBtn.className = 'topic-editor-card__delete';
             delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
             delBtn.onclick = () => removeTopic(topic.key);
             header.appendChild(delBtn);
@@ -190,7 +118,7 @@ function renderEditorTopicsList() {
 
         const descInput = document.createElement('textarea');
         descInput.rows = 2;
-        descInput.className = 'w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-[10px] text-slate-300 resize-none';
+        descInput.className = 'topic-editor-card__textarea';
         descInput.value = topic.desc;
         descInput.oninput = (e) => updateTopicDesc(topic.key, e.target.value);
         item.appendChild(descInput);
@@ -204,10 +132,9 @@ function updateTemplateButtonsUI(tmpl) {
     templates.forEach((t) => {
         const btn = document.getElementById('btn-tmpl-' + t);
         if (btn) {
+            btn.className = 'template-btn';
             if (t === tmpl) {
-                btn.className = 'p-2 text-[11px] font-medium rounded-lg border bg-slate-900 border-amber-500/50 text-amber-400 hover:bg-slate-800 transition text-center leading-tight';
-            } else {
-                btn.className = 'p-2 text-[11px] font-medium rounded-lg border bg-slate-900 border-slate-800 text-slate-400 hover:bg-slate-800 transition text-center leading-tight';
+                btn.classList.add('template-btn--active');
             }
         }
     });
@@ -233,9 +160,10 @@ function renderPortfolio() {
         const btn = document.createElement('button');
         const isActive = (state.activeTopic || state.topics[0].key).toUpperCase() === cleanKey;
 
-        btn.className = isActive
-            ? 'text-[11px] font-mono font-bold tracking-wider uppercase px-3 py-1 rounded shadow-md transition transform scale-105 bg-[var(--primary-color)] text-slate-950'
-            : 'text-[11px] font-mono font-semibold tracking-wider uppercase px-3 py-1 rounded border border-slate-700/80 text-slate-300 bg-slate-800/60 hover:border-[var(--primary-color)] transition';
+        btn.className = 'topic-pill';
+        if (isActive) {
+            btn.classList.add('active');
+        }
 
         btn.innerText = topic.name;
         btn.onclick = () => selectTopic(cleanKey);
@@ -256,7 +184,7 @@ function renderPortfolio() {
     skillsList.innerHTML = '';
     state.skills.forEach((skill) => {
         const skillTag = document.createElement('div');
-        skillTag.className = 'flex items-center gap-1.5 bg-slate-800/50 border border-slate-700/60 rounded-md px-2 py-0.5 text-[11px] font-[var(--font-family)]';
+        skillTag.className = 'skill-tag';
         skillTag.style.color = 'var(--text-color)';
 
         const skillText = document.createElement('span');
@@ -265,7 +193,7 @@ function renderPortfolio() {
 
 if (!isReadOnly) {
                 const delBtn = document.createElement('button');
-                delBtn.className = 'edit-control text-rose-500 hover:text-rose-400 ml-1 cursor-pointer';
+                delBtn.className = 'edit-control skill-tag__remove';
                 delBtn.innerHTML = '<i class="fa-solid fa-xmark text-[10px]"></i>';
                 delBtn.onclick = () => removeSkill(skill);
                 skillTag.appendChild(delBtn);
@@ -274,33 +202,87 @@ if (!isReadOnly) {
         skillsList.appendChild(skillTag);
     });
 
+    // Atualiza o título da seção para mostrar a especialidade atual
+    const certsTitleEl = document.querySelector('#sec-certs .section-card__title');
+    if (certsTitleEl) {
+        certsTitleEl.innerText = `Certificados Oficiais - ${activeTopicObj.name}`;
+    }
+
     const certsGrid = document.getElementById('certs-grid');
     certsGrid.innerHTML = '';
-    state.certs.forEach((cert) => {
+    
+    // Filtra os certificados para mostrar apenas os da especialidade atual
+    // (O fallback "!cert.topic && state.activeTopic === 'FRONT'" garante que certificados antigos não quebrem)
+    const filteredCerts = state.certs.filter(cert => 
+        cert.topic === state.activeTopic || (!cert.topic && state.activeTopic === 'FRONT')
+    );
+    
+    filteredCerts.forEach((cert) => {
         const certCard = document.createElement('div');
-        certCard.className = 'bg-slate-800/30 border border-slate-800 rounded-[var(--card-radius)] p-3 flex flex-col items-center justify-center text-center gap-1.5 group relative hover:border-[var(--primary-color)] transition';
+        certCard.className = 'cert-card';
+        certCard.style.cursor = 'pointer'; 
+        
+        // Evento para abrir o arquivo em uma nova aba de forma segura (Blob)
+        certCard.onclick = () => {
+            if (cert.url) {
+                fetch(cert.url)
+                    .then(res => res.blob())
+                    .then(blob => {
+                        const blobUrl = URL.createObjectURL(blob);
+                        window.open(blobUrl, '_blank');
+                        setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+                    })
+                    .catch(() => alert("Erro ao tentar abrir o arquivo."));
+            } else {
+                alert("Este certificado de rascunho ainda não possui um arquivo anexado.");
+            }
+        };
 
-        const iconWrapper = document.createElement('div');
-        iconWrapper.className = 'w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center text-[var(--primary-color)]';
-        iconWrapper.innerHTML = cert.type === 'PDF'
-            ? '<i class="fa-solid fa-file-pdf text-xs"></i>'
-            : '<i class="fa-solid fa-file-image text-xs"></i>';
-        certCard.appendChild(iconWrapper);
+        // Cria a caixa da miniatura
+        const mediaWrapper = document.createElement('div');
+        mediaWrapper.style.width = '100%';
+        mediaWrapper.style.aspectRatio = '1 / 1'; // <-- FORÇA O FORMATO QUADRADO
+        mediaWrapper.style.borderRadius = '8px';
+        mediaWrapper.style.overflow = 'hidden';
+        mediaWrapper.style.display = 'flex';
+        mediaWrapper.style.alignItems = 'center';
+        mediaWrapper.style.justifyContent = 'center';
+        mediaWrapper.style.background = 'rgba(15, 23, 42, 0.6)';
+        mediaWrapper.style.marginBottom = '8px';
 
+        // --- AQUI ESTÁ AQUELE ÚLTIMO CÓDIGO! ---
+        // Se a miniatura existir (imagem ou PDF extraído com sucesso), exibe ela
+        if (cert.thumbnailUrl) {
+            mediaWrapper.innerHTML = `<img src="${cert.thumbnailUrl}" style="width: 100%; height: 100%; object-fit: cover;" alt="Thumbnail de ${cert.name}">`;
+        } else {
+            // Fallback (caso a geração falhe ou para os certificados iniciais sem arquivo)
+            mediaWrapper.innerHTML = cert.type === 'PDF'
+                ? '<i class="fa-solid fa-file-pdf" style="font-size: 2.5rem; color: #f43f5e; opacity: 0.8;"></i>'
+                : '<i class="fa-solid fa-file-image" style="font-size: 2.5rem; color: var(--primary-color); opacity: 0.5;"></i>';
+        }
+        
+        certCard.appendChild(mediaWrapper);
+        
+        // Cria o título
         const title = document.createElement('span');
-        title.className = 'text-[10px] font-medium leading-snug font-[var(--font-family)] line-clamp-2';
+        title.className = 'cert-card__title';
         title.style.color = 'var(--text-color)';
         title.innerText = cert.name;
         certCard.appendChild(title);
 
-if (!isReadOnly) {
-                    const delCertBtn = document.createElement('button');
-                    delCertBtn.className = 'edit-control absolute top-1 right-1 text-rose-500 opacity-0 group-hover:opacity-100 transition';
-                    delCertBtn.innerHTML = '<i class="fa-solid fa-xmark text-[10px]"></i>';
-                    delCertBtn.onclick = () => removeCert(cert.name);
-                    certCard.appendChild(delCertBtn);
-                }
-
+        // Cria o botão de excluir
+        if (!isReadOnly) {
+            const delCertBtn = document.createElement('button');
+            delCertBtn.className = 'edit-control cert-card__delete';
+            delCertBtn.style.position = 'relative'; 
+            delCertBtn.style.zIndex = '10'; // Garante que o clique no X não abra o arquivo
+            delCertBtn.innerHTML = '<i class="fa-solid fa-xmark text-[10px]"></i>';
+            delCertBtn.onclick = (e) => {
+                e.stopPropagation(); // Impede a ação de abrir o PDF
+                removeCert(cert.name);
+            };
+            certCard.appendChild(delCertBtn);
+        }
         certsGrid.appendChild(certCard);
     });
 
@@ -347,17 +329,21 @@ function selectTopic(topicKey) {
 function renderCenterIllustration() {
     const key = (state.activeTopic || 'FRONT').toUpperCase();
     const activeTopicObj = state.topics.find((t) => t.key.toUpperCase() === key) || state.topics[0];
-    const data = TOPIC_ILLUSTRATIONS[key] || TOPIC_ILLUSTRATIONS.DEFAULT;
-
+    
     document.getElementById('active-topic-badge').innerText = key;
     document.getElementById('illustration-caption').innerText = activeTopicObj.name + ' - Especialidade';
-
+    
     const illustrationBox = document.getElementById('center-illustration-box');
-
+    
     if (activeTopicObj.imgUrl) {
         illustrationBox.innerHTML = `<img src="${activeTopicObj.imgUrl}" class="w-full h-full object-contain rounded-md" alt="Ilustração ${activeTopicObj.name}">`;
     } else {
-        illustrationBox.innerHTML = data.svg;
+        // Placeholder simples com um ícone de imagem
+        illustrationBox.innerHTML = `
+            <div style="display:flex; align-items:center; justify-content:center; width:100%; height:100%; background:rgba(30,41,59,0.5); border-radius:8px;">
+                <i class="fa-solid fa-image" style="font-size: 2rem; opacity: 0.5;"></i>
+            </div>
+        `;
     }
 }
 
@@ -433,12 +419,71 @@ function removeSkill(skill) {
 }
 
 function promptAddCert() {
-    const name = prompt('Nome do Certificado:');
-    if (name && name.trim() !== '') {
-        const type = confirm('O formato é PDF? (Cancelar para Imagem)') ? 'PDF' : 'IMG';
-        state.certs.push({ name: name.trim(), type });
-        renderPortfolio();
+    // Aciona o input oculto para abrir a janela de seleção de arquivos
+    document.getElementById('cert-file-input').click();
+}
+
+function loadCertFile(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const name = prompt('Digite o nome deste certificado:');
+    if (!name || name.trim() === '') {
+        event.target.value = ''; 
+        return;
     }
+
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+        const isPDF = file.type === 'application/pdf';
+        const fileBase64 = e.target.result;
+        
+        let thumbnailUrl = fileBase64; // Se for imagem, a thumbnail é a própria imagem
+
+        if (isPDF) {
+            try {
+                // Remove o cabeçalho do base64 (data:application/pdf;base64,) para o PDF.js
+                const base64Data = fileBase64.split(',')[1];
+                const pdfData = atob(base64Data);
+                const uint8Array = new Uint8Array(pdfData.length);
+                for (let i = 0; i < pdfData.length; i++) {
+                    uint8Array[i] = pdfData.charCodeAt(i);
+                }
+
+                // Carrega o PDF e extrai a página 1
+                const pdf = await pdfjsLib.getDocument({ data: uint8Array }).promise;
+                const page = await pdf.getPage(1);
+                
+                // Cria um canvas temporário para desenhar a página
+                const viewport = page.getViewport({ scale: 0.5 }); // Escala reduzida para ficar leve
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                // Renderiza e converte para imagem JPG
+                await page.render({ canvasContext: context, viewport: viewport }).promise;
+                thumbnailUrl = canvas.toDataURL('image/jpeg', 0.8);
+            } catch (error) {
+                console.error("Erro ao gerar capa do PDF:", error);
+                thumbnailUrl = null; // Falha silenciosa, cai para o ícone padrão
+            }
+        }
+        
+        // Salva o certificado com a URL do arquivo E a URL da miniatura
+        state.certs.push({ 
+            name: name.trim(), 
+            type: isPDF ? 'PDF' : 'IMG',
+            url: fileBase64,
+            thumbnailUrl: thumbnailUrl,
+            topic: state.activeTopic // <-- Salva a especialidade atual junto com o certificado!
+        });
+        
+        renderPortfolio();
+    };
+    
+    reader.readAsDataURL(file);
+    event.target.value = ''; 
 }
 
 function removeCert(name) {
@@ -457,10 +502,8 @@ function loadAvatar(event) {
         reader.onload = function(e) {
             state.content.avatar = e.target.result;
             const img = document.getElementById('avatar-image');
-            const fallback = document.getElementById('avatar-fallback');
             img.src = e.target.result;
             img.classList.remove('hidden');
-            fallback.classList.add('hidden');
             renderPortfolio();
         };
         reader.readAsDataURL(file);
@@ -496,40 +539,38 @@ function togglePreviewMode() {
 
 function updatePreviewModeUI() {
     const sidebar = document.getElementById('editor-panel');
-    const indicators = document.querySelectorAll('.edit-control');
     const editBadge = document.getElementById('edit-indicator');
+    const indicators = document.querySelectorAll('.edit-control');
     const btn = document.getElementById('btn-preview-mode');
     const icon = document.getElementById('preview-icon');
     const text = document.getElementById('preview-text');
 
+    // Função auxiliar para evitar repetição
+    const toggleVisibility = (hide) => {
+        sidebar?.classList.toggle('hidden', hide);
+        editBadge?.classList.toggle('hidden', hide);
+        indicators?.forEach(el => el.classList.toggle('hidden', hide));
+    };
+
     if (isReadOnly) {
-        if (sidebar) sidebar.classList.add('hidden');
-        if (editBadge) editBadge.classList.add('hidden');
-        indicators.forEach((el) => el.classList.add('hidden'));
-        if (btn) {
-            btn.classList.add('hidden');
-        }
-        updateURLDisplay();
+        toggleVisibility(true);
+        btn?.classList.add('hidden');
         return;
     }
 
-    if (isPreviewMode) {
-        sidebar.classList.add('hidden');
-        editBadge.classList.add('hidden');
-        indicators.forEach((el) => el.classList.add('hidden'));
-        icon.className = 'fa-solid fa-pen-to-square';
-        text.innerText = 'Modo de Edição';
-        btn.className = 'bg-amber-600 hover:bg-amber-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 shadow-md shadow-amber-950/25';
-    } else {
-        sidebar.classList.remove('hidden');
-        editBadge.classList.remove('hidden');
-        indicators.forEach((el) => el.classList.remove('hidden'));
-        icon.className = 'fa-solid fa-eye-slash';
-        text.innerText = 'Modo Visualização';
-        btn.className = 'bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 border border-slate-700';
+    // Alterna a visibilidade baseada no modo atual
+    toggleVisibility(isPreviewMode);
+
+    // Usa um 'if' curto apenas para alterar o ícone/texto, se eles existirem no HTML
+    if (icon) icon.className = isPreviewMode ? 'fa-solid fa-pen-to-square' : 'fa-solid fa-eye-slash';
+    if (text) text.innerText = isPreviewMode ? 'Modo de Edição' : 'Modo Visualização';
+    
+    if (btn) {
+        btn.className = isPreviewMode 
+            ? 'bg-amber-600 hover:bg-amber-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 shadow-md shadow-amber-950/25'
+            : 'bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 border border-slate-700';
+        btn.classList.remove('hidden');
     }
-    if (btn) btn.classList.remove('hidden');
-    updateURLDisplay();
 }
 
 async function savePortfolioToCloud() {
@@ -625,21 +666,3 @@ function copyShareUrl() {
     });
 }
 
-function updateURLDisplay() {
-    const urlBar = document.getElementById('browser-url');
-    const baseUrl = 'https://devfolio.s3-website.us-east-1.amazonaws.com/';
-    const userSlug = (state.content.name || 'portfolio')
-        .trim()
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-');
-
-    if (isReadOnly) {
-        urlBar.innerText = baseUrl + '?user=' + encodeURIComponent(userSlug);
-    } else if (isPreviewMode) {
-        urlBar.innerText = baseUrl + '?user=' + encodeURIComponent(userSlug);
-    } else {
-        urlBar.innerText = baseUrl + 'editor.html';
-    }
-}
