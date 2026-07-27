@@ -732,6 +732,9 @@ async function savePortfolioToCloud() {
             });
         }
 
+        // Recomprime avatar, imagens de área e thumbnails de certificados juntos até caber em 400KB
+        await compressImagesToBudget(stateToSave, 400 * 1024);
+
         // Faz o envio com payload ultra enxuto
         const response = await fetch(API_URL + '/portfolio', {
             method: 'POST',
@@ -854,6 +857,50 @@ function startAutoSave(intervalSeconds = 2) {
 }
 
 /**
+ * Redimensiona e comprime uma imagem (Base64) já carregada, sem passar pelo FileReader.
+ * @param {string} base64 - Imagem de origem em formato Data URL
+ * @param {number} maxWidth - Largura máxima permitida
+ * @param {number} maxHeight - Altura máxima permitida
+ * @param {number} quality - Qualidade da compressão de 0.1 a 1.0
+ * @returns {Promise<string>} Data URL da imagem redimensionada em JPEG
+ */
+function resizeBase64Image(base64, maxWidth, maxHeight, quality) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+
+        img.onload = () => {
+            let width = img.width;
+            let height = img.height;
+
+            // Mantém a proporção da imagem (Aspect Ratio)
+            if (width > height) {
+                if (width > maxWidth) {
+                    height = Math.round((height * maxWidth) / width);
+                    width = maxWidth;
+                }
+            } else {
+                if (height > maxHeight) {
+                    width = Math.round((width * maxHeight) / height);
+                    height = maxHeight;
+                }
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+
+        img.onerror = (error) => reject(error);
+        img.src = base64;
+    });
+}
+
+/**
  * Redimensiona e comprime uma imagem no navegador antes de salvar no estado.
  * @param {File} file - Arquivo de imagem vindo do <input type="file">
  * @param {number} maxWidth - Largura máxima permitida (ex: 800px)
@@ -864,46 +911,70 @@ function startAutoSave(intervalSeconds = 2) {
 function compressImage(file, maxWidth = 800, maxHeight = 800, quality = 0.7) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.readAsDataURL(file);
-
         reader.onload = (event) => {
-            const img = new Image();
-            img.src = event.target.result;
-
-            img.onload = () => {
-                let width = img.width;
-                let height = img.height;
-
-                // Mantém a proporção da imagem (Aspect Ratio)
-                if (width > height) {
-                    if (width > maxWidth) {
-                        height = Math.round((height * maxWidth) / width);
-                        width = maxWidth;
-                    }
-                } else {
-                    if (height > maxHeight) {
-                        width = Math.round((width * maxHeight) / height);
-                        height = maxHeight;
-                    }
-                }
-
-                // Desenha a imagem no Canvas com as novas dimensões
-                const canvas = document.createElement('canvas');
-                canvas.width = width;
-                canvas.height = height;
-
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, width, height);
-
-                // Exporta a imagem comprimida em formato JPEG leve
-                const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
-                resolve(compressedBase64);
-            };
-
-            img.onerror = (error) => reject(error);
+            resizeBase64Image(event.target.result, maxWidth, maxHeight, quality).then(resolve, reject);
         };
-
         reader.onerror = (error) => reject(error);
+        reader.readAsDataURL(file);
     });
+}
+
+/**
+ * Tamanho aproximado em bytes de uma Data URL Base64.
+ */
+function base64SizeInBytes(dataUrl) {
+    if (!dataUrl || typeof dataUrl !== 'string') return 0;
+    const commaIndex = dataUrl.indexOf(',');
+    if (commaIndex === -1) return 0;
+    return Math.round((dataUrl.length - commaIndex - 1) * 0.75);
+}
+
+/**
+ * Recomprime todas as imagens do portfólio (avatar, imagens de área e thumbnails de certificados)
+ * até que a soma de todas caiba no orçamento total informado (padrão 400KB).
+ * @param {object} stateToSave - Cópia do state que será enviada para a nuvem (mutada em memória)
+ * @param {number} maxTotalBytes - Orçamento total combinado, em bytes
+ */
+async function compressImagesToBudget(stateToSave, maxTotalBytes = 400 * 1024) {
+    const images = [];
+
+    if (stateToSave.content?.avatar?.startsWith('data:')) {
+        images.push({ get: () => stateToSave.content.avatar, set: (v) => { stateToSave.content.avatar = v; } });
+    }
+
+    (stateToSave.topics || []).forEach((topic) => {
+        if (topic.imgUrl?.startsWith('data:')) {
+            images.push({ get: () => topic.imgUrl, set: (v) => { topic.imgUrl = v; } });
+        }
+    });
+
+    (stateToSave.certs || []).forEach((cert) => {
+        if (cert.thumbnailUrl?.startsWith('data:')) {
+            images.push({ get: () => cert.thumbnailUrl, set: (v) => { cert.thumbnailUrl = v; } });
+        }
+    });
+
+    if (images.length === 0) return;
+
+    const totalSize = () => images.reduce((sum, img) => sum + base64SizeInBytes(img.get()), 0);
+
+    let quality = 0.6;
+    let maxDim = 400;
+    let attempts = 0;
+
+    while (totalSize() > maxTotalBytes && attempts < 10) {
+        for (const img of images) {
+            const resized = await resizeBase64Image(img.get(), maxDim, maxDim, quality);
+            img.set(resized);
+        }
+
+        quality = Math.max(0.1, quality - 0.1);
+        maxDim = Math.max(100, Math.round(maxDim * 0.85));
+        attempts++;
+    }
+
+    if (totalSize() > maxTotalBytes) {
+        console.warn('Não foi possível reduzir as imagens abaixo de ' + maxTotalBytes + ' bytes sem perder qualidade demais.');
+    }
 }
 
