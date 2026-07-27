@@ -853,7 +853,9 @@ async function uploadFileToS3(file, folder = 'misc') {
             });
     }
 
-    // 1. Pede a URL presigned enviando a flag action para o seu endpoint /portfolio
+    const fileType = file.type || 'application/octet-stream';
+
+    // 1. Pede a URL presigned
     const response = await fetch(API_URL + '/portfolio', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -861,7 +863,7 @@ async function uploadFileToS3(file, folder = 'misc') {
             action: 'getUploadUrl',
             portfolioId: state.portfolioId,
             fileName: file.name,
-            fileType: file.type,
+            fileType: fileType, // Envia o tipo exato
             folder: folder
         })
     });
@@ -870,10 +872,13 @@ async function uploadFileToS3(file, folder = 'misc') {
 
     const { uploadUrl, filePublicUrl } = await response.json();
 
-    // 2. Envia o arquivo diretamente para o Amazon S3 sem assinar headers extras
+    // 2. Envia para o S3 com o MESMO Content-Type assinado
     const uploadRes = await fetch(uploadUrl, {
         method: 'PUT',
-        body: file // Envia diretamente o arquivo bruto
+        headers: {
+            'Content-Type': fileType
+        },
+        body: file
     });
 
     if (!uploadRes.ok) throw new Error('Erro ao transferir arquivo para o S3');
