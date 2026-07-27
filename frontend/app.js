@@ -1,4 +1,5 @@
 const DEFAULT_STATE = {
+    portfolioId: '',
     template: 'wireframe',
     primaryColor: '#f59e0b',
     bgColor: '#0f172a',
@@ -575,33 +576,45 @@ function updatePreviewModeUI() {
 
 async function savePortfolioToCloud() {
     const btn = document.querySelector('button[onclick="savePortfolioToCloud()"]');
+    
+    // Pede a senha antes de fazer qualquer coisa
+    const pass = prompt("Digite a senha de administrador para salvar as alterações:");
+    if (!pass) {
+        alert("Salvamento cancelado.");
+        return;
+    }
 
     try {
         if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...';
+        if (!API_URL) throw new Error('API_URL ainda não foi configurada.');
 
-        if (!API_URL) {
-            throw new Error('API_URL ainda não foi configurada.');
+        // Gera um ID único compatível com qualquer ambiente (file:// ou https://)
+        if (!state.portfolioId) {
+            state.portfolioId = (typeof crypto !== 'undefined' && crypto.randomUUID) 
+                ? crypto.randomUUID() 
+                : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                    var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+                    return v.toString(16);
+                });
         }
 
+        // Envia os dados e a senha (Token) para o Lambda
         const response = await fetch(API_URL + '/portfolio', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${pass}`
             },
             body: JSON.stringify(state)
         });
 
         const responseText = await response.text();
-
-        if (!response.ok) {
-            console.error('Erro da API:', responseText);
-            throw new Error(responseText || 'Falha ao salvar no backend');
-        }
-
+        if (!response.ok) throw new Error(responseText || 'Falha ao salvar no backend');
+        
         alert('Portfólio salvo na Nuvem com sucesso!');
     } catch (error) {
         console.error('Erro de comunicação:', error);
-        alert('Falha ao tentar salvar na nuvem.');
+        alert('Falha ao tentar salvar na nuvem: ' + error.message);
     } finally {
         if (btn) btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Salvar na Nuvem';
     }
@@ -638,15 +651,14 @@ async function loadPortfolioFromCloud(userId) {
 }
 
 function generateShareLink() {
-    const userId = (state.content.name || 'portfolio')
-        .trim()
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-');
+    // Garante que o usuário salvou antes de tentar compartilhar
+    if (!state.portfolioId) {
+        alert("Você precisa salvar o portfólio na nuvem pelo menos uma vez para gerar o link público!");
+        return;
+    }
 
     const baseUrl = window.location.origin + window.location.pathname;
-    const fullShareUrl = baseUrl + '?user=' + userId;
+    const fullShareUrl = baseUrl + '?user=' + state.portfolioId;
 
     document.getElementById('share-url-input').value = fullShareUrl;
     document.getElementById('share-modal').classList.remove('hidden');

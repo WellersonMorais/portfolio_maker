@@ -89,8 +89,12 @@
 
                     <div class="control-grid">
                         <div>
-                            <label for="font-scale" class="field-label">Escala da Fonte</label>
-                            <input type="range" id="font-scale" min="0.8" max="1.3" step="0.05" value="1.0" oninput="updateStyleVar('--font-scale', this.value)" class="slider">
+                            <label for="font-scale" class="field-label">Tamanho da Fonte (Global)</label>
+                            <select id="font-scale" onchange="updateStyleVar('--font-scale', this.value)" class="field-select">
+                                <option value="1.0">Regular</option>
+                                <option value="1.15">Large</option>
+                                <option value="1.3">Extra Large</option>
+                            </select>
                         </div>
                         <div>
                             <label for="border-radius" class="field-label">Bordas (Arredondado)</label>

@@ -83,14 +83,15 @@
 }
 
 .template-btn {
-    padding: 8px;
-    font-size: 0.7rem;
-    font-weight: 500;
+    padding: 12px 8px; /* Botões mais altos */
+    font-size: 0.8rem;
+    font-weight: 600;
     text-align: center;
     line-height: 1.3;
     background: #0f172a;
     border-color: #334155;
     color: #94a3b8;
+    border-radius: 12px;
 }
 
 .template-btn--active {
@@ -120,10 +121,10 @@
 }
 
 .field-label {
-    font-size: 0.7rem;
+    font-size: 0.85rem;
     color: #94a3b8;
     display: block;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
 }
 
 .color-picker {
@@ -135,18 +136,15 @@
     cursor: pointer;
 }
 
-.field-input,
-.field-select,
-textarea {
+.field-input, .field-select, textarea {
     width: 100%;
     background: #0f172a;
     border: 1px solid #1e293b;
-    border-radius: 8px;
-    padding: 8px;
+    border-radius: 10px; 
+    padding: 12px;
     color: #e2e8f0;
-    font-size: 0.75rem;
+    font-size: 0.85rem; 
 }
-
 .field-input--textarea {
     resize: none;
 }

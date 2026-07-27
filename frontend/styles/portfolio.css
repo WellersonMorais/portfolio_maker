@@ -369,3 +369,57 @@
     font-size: 0.65rem;
     opacity: 0.6;
 }
+
+/* =========================================
+   ESTILIZAÇÃO LÚDICA, ANIMAÇÕES E ESCALAS
+========================================= */
+
+/* 1. Faz a escala da fonte funcionar no site todo! */
+.hero-subtitle { font-size: calc(0.85rem * var(--font-scale)) !important; }
+.section-card__title { font-size: calc(0.85rem * var(--font-scale)) !important; }
+.section-card__text { font-size: calc(0.9rem * var(--font-scale)) !important; line-height: 1.7 !important; }
+.topic-list button { font-size: calc(0.75rem * var(--font-scale)) !important; padding: 8px 16px !important; }
+.skill-list > div { font-size: calc(0.75rem * var(--font-scale)) !important; padding: 6px 12px !important; }
+.certs-grid span { font-size: calc(0.7rem * var(--font-scale)) !important; }
+
+/* 2. Animação de mola nos Cards (Sobre Mim, Experiência, Certificados) */
+.section-card, .certs-grid > div {
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease, border-color 0.4s ease !important;
+}
+.section-card:hover, .certs-grid > div:hover {
+    transform: translateY(-6px) !important;
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.3) !important;
+    border-color: var(--primary-color) !important;
+}
+
+/* 3. Avatar super divertido (Dá uma giradinha ao passar o mouse) */
+.avatar-frame {
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease !important;
+}
+.avatar-frame:hover {
+    transform: scale(1.1) rotate(-6deg) !important;
+    box-shadow: 0 10px 25px var(--primary-color) !important;
+}
+
+/* 4. Tags de Habilidades que acendem e saltam */
+.skill-list > div {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    cursor: default;
+}
+.skill-list > div:hover {
+    transform: translateY(-4px) scale(1.08) !important;
+    background: var(--primary-color) !important;
+    color: #020617 !important; /* Texto escuro para dar contraste com a cor primária */
+    border-color: transparent !important;
+    font-weight: 700 !important;
+}
+
+/* 5. Botões de Especialidade mais vivos */
+.topic-list button {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+.topic-list button:not(.active):hover {
+    transform: translateY(-3px) scale(1.05) !important;
+    background: rgba(30, 41, 59, 0.9) !important;
+    border-color: var(--primary-color) !important;
+}
