@@ -637,20 +637,45 @@ async function savePortfolioToCloud() {
                 });
         }
 
-        // Requisição SEM o header de Authorization
+        // --- SOLUÇÃO RÁPIDA: Cria uma cópia limpando os arquivos gigantes antes de enviar ---
+        const stateToSave = JSON.parse(JSON.stringify(state));
+
+        if (stateToSave.certs && Array.isArray(stateToSave.certs)) {
+            stateToSave.certs = stateToSave.certs.map(cert => {
+                // Se o arquivo/PDF for um Base64 grande (começa com data: e é maior que 50kb), 
+                // removemos a propriedade 'url' pesada e deixamos apenas a thumbnail leve
+                if (cert.url && cert.url.startsWith('data:') && cert.url.length > 50000) {
+                    return {
+                        name: cert.name,
+                        type: cert.type,
+                        topic: cert.topic,
+                        thumbnailUrl: cert.thumbnailUrl // Mantém a miniatura leve que você gerou!
+                    };
+                }
+                return cert;
+            });
+        }
+
+        // Limpa também a foto de perfil/avatar caso seja uma imagem gigantesca
+        if (stateToSave.content && stateToSave.content.avatar && stateToSave.content.avatar.length > 200000) {
+            alert('Sua imagem de perfil é muito grande! Escolha uma imagem menor para conseguir salvar.');
+            if (btn) btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Salvar na Nuvem';
+            return;
+        }
+
+        // Faz o envio com o payload leve
         const response = await fetch(API_URL + '/portfolio', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(state)
+            body: JSON.stringify(stateToSave)
         });
 
         const responseText = await response.text();
         if (!response.ok) throw new Error(responseText || 'Falha ao salvar no backend');
         
-        alert('Portfólio salvo com sucesso! Agora você pode gerar o seu link de compartilhamento.');
-        // SALVA O ID NA MEMÓRIA DO NAVEGADOR
+        alert('Portfólio salvo com sucesso!');
         localStorage.setItem('meuPortfolioId', state.portfolioId);
     } catch (error) {
         console.error('Erro de comunicação:', error);
@@ -659,7 +684,6 @@ async function savePortfolioToCloud() {
         if (btn) btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Salvar na Nuvem';
     }
 }
-
 function saveDraft() {
     return savePortfolioToCloud();
 }
