@@ -29,10 +29,10 @@
 
             <!-- ================= SELEÇÃO DE TEMPLATE ================= -->
             <section class="panel-section" aria-labelledby="title-templates">
-                <h3 id="title-templates" class="section-title">1. Escolha o Template Base</h3>
+                <h3 id="title-templates" class="section-title">Modos de cor Padrão</h3>
                 <nav class="template-nav" aria-label="Seleção de Templates">
-                    <button onclick="setTemplate('wireframe')" id="btn-tmpl-wireframe" class="template-btn template-btn--active">
-                        Wireframe (Ilustrado)
+                    <button onclick="setTemplate('RegularMode')" id="btn-tmpl-RegularMode" class="template-btn template-btn--active">
+                        RegularMode 
                     </button>
                     <button onclick="setTemplate('tech')" id="btn-tmpl-tech" class="template-btn">
                         Modern Tech
@@ -45,7 +45,7 @@
 
             <!-- ================= PERSONALIZAÇÃO VISUAL ================= -->
             <section class="panel-section" aria-labelledby="title-visuals">
-                <h3 id="title-visuals" class="section-title">2. Personalização Visual</h3>
+                <h3 id="title-visuals" class="section-title">Personalização Visual</h3>
 
                 <fieldset class="color-fieldset">
                     <legend class="sr-only">Cores do Tema</legend>
@@ -106,7 +106,7 @@
 
             <!-- ================= CONTEÚDO E SEÇÕES ================= -->
             <section class="panel-section" aria-labelledby="title-content">
-                <h3 id="title-content" class="section-title">3. Editar Conteúdo</h3>
+                <h3 id="title-content" class="section-title">Editar Conteúdo</h3>
 
                 <div>
                     <label for="content-name" class="field-label">Nome Principal</label>
@@ -120,8 +120,8 @@
 
                 <div class="section-divider">
                     <header class="section-divider__header">
-                        <span class="section-divider__title">Especialidades & Experiências</span>
-                        <button onclick="promptAddTopic()" class="add-btn" aria-label="Adicionar nova especialidade">
+                        <span class="section-divider__title">Areas & Experiências</span>
+                        <button onclick="promptAddTopic()" class="add-btn" aria-label="Adicionar nova Area">
                             <i class="fa-solid fa-plus" aria-hidden="true"></i> Nova
                         </button>
                     </header>
@@ -214,15 +214,15 @@
                             </p>
                         </section>
 
-                        <!-- ================= ESPECIALIDADES ================= -->
+                        <!-- ================= AreaS ================= -->
                         <section class="topics-section">
                             <header class="topics-section__header">
-                                <span>Especialidades (Clique para alterar o foco e a ilustração):</span>
+                                <span>Areas (Clique para alterar o foco e a ilustração):</span>
                                 <button onclick="promptAddTopic()" class="edit-control add-btn add-btn--compact">
-                                    <i class="fa-solid fa-plus" aria-hidden="true"></i> Add Especialidade
+                                    <i class="fa-solid fa-plus" aria-hidden="true"></i> Add Area
                                 </button>
                             </header>
-                            <nav id="view-role-container" class="topic-list" aria-label="Lista de Especialidades"></nav>
+                            <nav id="view-role-container" class="topic-list" aria-label="Lista de Areas"></nav>
                         </section>
 
                         <!-- ================= GRID DE CONTEÚDO ================= -->
@@ -242,16 +242,13 @@
                             <figure id="sec-illustration" class="section-card section-card--illustration">
                                 <span id="active-topic-badge" class="active-topic-badge">FRONT</span>
 
-                                <button onclick="triggerTopicImageUpload()" class="edit-control illustration-upload-btn" aria-label="Upload de ilustração da especialidade">
+                                <button onclick="triggerTopicImageUpload()" class="edit-control illustration-upload-btn" aria-label="Upload de ilustração da Area">
                                     <i class="fa-solid fa-image" aria-hidden="true"></i>
                                 </button>
                                 <input type="file" id="topic-image-input" class="hidden" accept="image/*" onchange="loadTopicImage(event)">
 
                                 <div id="center-illustration-box" class="illustration-box"></div>
 
-                                <figcaption class="illustration-caption">
-                                    <span id="illustration-caption">Especialista Front-End</span>
-                                </figcaption>
                             </figure>
 
                             <section id="sec-skills" class="section-card section-card--skills">
@@ -273,7 +270,7 @@
                         <!-- ================= CERTIFICADOS ================= -->
                         <section id="sec-certs" class="certs-section">
                             <header class="certs-section__header">
-                                <h3 class="section-card__title">Certificados Oficiais</h3>
+                                <h3 class="section-card__title">Certificados</h3>
                                 <div class="section-card__actions">
                                     <button onclick="promptAddCert()" class="edit-control cert-add-btn">
                                         <i class="fa-solid fa-plus" aria-hidden="true"></i> Add Cert

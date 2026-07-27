@@ -1,7 +1,8 @@
+// Substitua o bloco do DEFAULT_STATE por este:
 const DEFAULT_STATE = {
     portfolioId: '',
-    template: 'wireframe',
-    primaryColor: '#f59e0b',
+    template: 'RegularMode',
+    primaryColor: '#0b80f5',
     bgColor: '#0f172a',
     textColor: '#f1f5f9',
     fontFamily: "'Inter', sans-serif",
@@ -9,10 +10,10 @@ const DEFAULT_STATE = {
     cardRadius: '12px',
     activeTopic: 'FRONT',
     topics: [
-        { key: 'FRONT', name: 'Especialidade 1', desc: 'Descreva aqui as suas principais habilidades, ferramentas utilizadas e experiências relacionadas a esta área de atuação.', imgUrl: null },
-        { key: 'BACK', name: 'Especialidade 2', desc: 'Use este espaço para detalhar seus conhecimentos técnicos, metodologias ou projetos de destaque neste tópico.', imgUrl: null },
-        { key: 'DESIGN', name: 'Especialidade 3', desc: 'Explique sua proficiência, histórico profissional e como você aplica esses conhecimentos na prática.', imgUrl: null },
-        { key: 'AWS', name: 'Especialidade 4', desc: 'Destaque competências adicionais, ferramentas específicas ou diferenciais que complementam o seu perfil.', imgUrl: null }
+        { key: 'FRONT', name: 'Area 1', desc: 'Descreva aqui as suas principais habilidades, ferramentas utilizadas e experiências relacionadas a esta área de atuação.', imgUrl: null },
+        { key: 'BACK', name: 'Area 2', desc: 'Use este espaço para detalhar seus conhecimentos técnicos, metodologias ou projetos de destaque neste tópico.', imgUrl: null },
+        { key: 'DESIGN', name: 'Area 3', desc: 'Explique sua proficiência, histórico profissional e como você aplica esses conhecimentos na prática.', imgUrl: null },
+        { key: 'AWS', name: 'Area 4', desc: 'Destaque competências adicionais, ferramentas específicas ou diferenciais que complementam o seu perfil.', imgUrl: null }
     ],
     content: {
         name: 'Seu Nome e Sobrenome',
@@ -24,7 +25,13 @@ const DEFAULT_STATE = {
         skills: true,
         certs: true
     },
-    skills: ['Competência 1', 'Competência 2', 'Competência 3', 'Competência 4', 'Competência 5', 'Competência 6'],
+    // NOVO FORMATO DE SKILLS (Isolado por Tópico):
+    skills: {
+        FRONT: ['Competência 1', 'Competência 2', 'Competência 3'],
+        BACK: ['Competência 1', 'Competência 2'],
+        DESIGN: ['Competência 1', 'Competência 2', 'Competência 3'],
+        AWS: ['Competência 1', 'Competência 2']
+    },
     certs: [
         { name: 'Nome da Certificação ou Curso 1', type: 'PDF', topic: 'AWS' },
         { name: 'Nome da Certificação ou Curso 2', type: 'PDF', topic: 'AWS' },
@@ -142,7 +149,7 @@ function renderEditorTopicsList() {
 }
 
 function updateTemplateButtonsUI(tmpl) {
-    const templates = ['wireframe', 'tech', 'minimal'];
+    const templates = ['RegularMode', 'tech', 'minimal'];
     templates.forEach((t) => {
         const btn = document.getElementById('btn-tmpl-' + t);
         if (btn) {
@@ -153,6 +160,7 @@ function updateTemplateButtonsUI(tmpl) {
         }
     });
 }
+
 
 function renderPortfolio() {
     const canvas = document.getElementById('portfolio-canvas');
@@ -196,7 +204,19 @@ function renderPortfolio() {
 
     const skillsList = document.getElementById('skills-list');
     skillsList.innerHTML = '';
-    state.skills.forEach((skill) => {
+    
+    // Obtém a chave da área atual (ex: FRONT, BACK, etc.)
+    const activeKey = (state.activeTopic || state.topics[0]?.key || 'FRONT').toUpperCase();
+    
+    // Suporte para o novo formato (Objeto) com Fallback para o antigo (Array)
+    let currentSkills = [];
+    if (Array.isArray(state.skills)) {
+        currentSkills = state.skills;
+    } else if (state.skills && state.skills[activeKey]) {
+        currentSkills = state.skills[activeKey];
+    }
+
+    currentSkills.forEach((skill) => {
         const skillTag = document.createElement('div');
         skillTag.className = 'skill-tag';
         skillTag.style.color = 'var(--text-color)';
@@ -205,27 +225,27 @@ function renderPortfolio() {
         skillText.innerText = skill;
         skillTag.appendChild(skillText);
 
-if (!isReadOnly) {
-                const delBtn = document.createElement('button');
-                delBtn.className = 'edit-control skill-tag__remove';
-                delBtn.innerHTML = '<i class="fa-solid fa-xmark text-[10px]"></i>';
-                delBtn.onclick = () => removeSkill(skill);
-                skillTag.appendChild(delBtn);
-            }
+        if (!isReadOnly) {
+            const delBtn = document.createElement('button');
+            delBtn.className = 'edit-control skill-tag__remove';
+            delBtn.innerHTML = '<i class="fa-solid fa-xmark text-[10px]"></i>';
+            delBtn.onclick = () => removeSkill(skill);
+            skillTag.appendChild(delBtn);
+        }
 
         skillsList.appendChild(skillTag);
     });
 
-    // Atualiza o título da seção para mostrar a especialidade atual
+    // Atualiza o título da seção para mostrar a Area atual
     const certsTitleEl = document.querySelector('#sec-certs .section-card__title');
     if (certsTitleEl) {
-        certsTitleEl.innerText = `Certificados Oficiais - ${activeTopicObj.name}`;
+        certsTitleEl.innerText = `Certificados - ${activeTopicObj.name}`;
     }
 
     const certsGrid = document.getElementById('certs-grid');
     certsGrid.innerHTML = '';
     
-    // Filtra os certificados para mostrar apenas os da especialidade atual
+    // Filtra os certificados para mostrar apenas os da Area atual
     // (O fallback "!cert.topic && state.activeTopic === 'FRONT'" garante que certificados antigos não quebrem)
     const filteredCerts = state.certs.filter(cert => 
         cert.topic === state.activeTopic || (!cert.topic && state.activeTopic === 'FRONT')
@@ -264,7 +284,6 @@ if (!isReadOnly) {
         mediaWrapper.style.background = 'rgba(15, 23, 42, 0.6)';
         mediaWrapper.style.marginBottom = '8px';
 
-        // --- AQUI ESTÁ AQUELE ÚLTIMO CÓDIGO! ---
         // Se a miniatura existir (imagem ou PDF extraído com sucesso), exibe ela
         if (cert.thumbnailUrl) {
             mediaWrapper.innerHTML = `<img src="${cert.thumbnailUrl}" style="width: 100%; height: 100%; object-fit: cover;" alt="Thumbnail de ${cert.name}">`;
@@ -302,7 +321,7 @@ if (!isReadOnly) {
 }
 
 function promptAddTopic() {
-    const name = prompt('Nome da nova especialidade (ex: DEVOPS, MOBILE, AI):');
+    const name = prompt('Nome da nova Area (ex: DEVOPS, MOBILE, AI):');
     if (name && name.trim() !== '') {
         const key = name.trim().toUpperCase();
         if (!state.topics.some((t) => t.key === key)) {
@@ -343,7 +362,6 @@ function renderCenterIllustration() {
     const activeTopicObj = state.topics.find((t) => t.key.toUpperCase() === key) || state.topics[0];
     
     document.getElementById('active-topic-badge').innerText = key;
-    document.getElementById('illustration-caption').innerText = activeTopicObj.name + ' - Especialidade';
     
     const illustrationBox = document.getElementById('center-illustration-box');
     
@@ -391,7 +409,7 @@ function toggleSection(section, value) {
 function setTemplate(tmpl) {
     state.template = tmpl;
 
-    if (tmpl === 'wireframe') {
+    if (tmpl === 'RegularMode') {
         state.primaryColor = '#f59e0b';
         state.bgColor = '#0f172a';
         state.textColor = '#f1f5f9';
@@ -418,15 +436,33 @@ function setTemplate(tmpl) {
 function promptAddSkill() {
     const skill = prompt('Nome da nova habilidade:');
     if (skill && skill.trim() !== '') {
-        if (!state.skills.includes(skill.trim())) {
-            state.skills.push(skill.trim());
+        const activeKey = (state.activeTopic || state.topics[0]?.key || 'FRONT').toUpperCase();
+
+        // Se state.skills ainda for um Array antigo, converte para Objeto
+        if (Array.isArray(state.skills) || !state.skills) {
+            state.skills = { FRONT: [], BACK: [], DESIGN: [], AWS: [] };
+        }
+
+        if (!state.skills[activeKey]) {
+            state.skills[activeKey] = [];
+        }
+
+        if (!state.skills[activeKey].includes(skill.trim())) {
+            state.skills[activeKey].push(skill.trim());
             renderPortfolio();
         }
     }
 }
 
 function removeSkill(skill) {
-    state.skills = state.skills.filter((s) => s !== skill);
+    const activeKey = (state.activeTopic || state.topics[0]?.key || 'FRONT').toUpperCase();
+
+    if (Array.isArray(state.skills)) {
+        state.skills = state.skills.filter((s) => s !== skill);
+    } else if (state.skills && state.skills[activeKey]) {
+        state.skills[activeKey] = state.skills[activeKey].filter((s) => s !== skill);
+    }
+
     renderPortfolio();
 }
 
@@ -488,7 +524,7 @@ function loadCertFile(event) {
             type: isPDF ? 'PDF' : 'IMG',
             url: fileBase64,
             thumbnailUrl: thumbnailUrl,
-            topic: state.activeTopic // <-- Salva a especialidade atual junto com o certificado!
+            topic: state.activeTopic // <-- Salva a Area atual junto com o certificado!
         });
         
         renderPortfolio();
