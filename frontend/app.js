@@ -1,85 +1,36 @@
-// const DEFAULT_STATE = {
-//     portfolioId: '',
-//     template: 'wireframe',
-//     primaryColor: '#f59e0b',
-//     bgColor: '#0f172a',
-//     textColor: '#f1f5f9',
-//     fontFamily: "'Inter', sans-serif",
-//     fontScale: '1.0',
-//     cardRadius: '12px',
-//     activeTopic: 'FRONT',
-//     topics: [
-//         { key: 'FRONT', name: 'FRONT', desc: 'Desenvolvimento de interfaces modernas, responsivas e interativas utilizando React, Vue, Tailwind CSS e TypeScript.', imgUrl: null },
-//         { key: 'BACK', name: 'BACK', desc: 'Construção de APIs RESTful de alta performance, arquitetura de microsserviços, Node.js, Python e SQL/NoSQL.', imgUrl: null },
-//         { key: 'DESIGN', name: 'DESIGN', desc: 'Criação de protótipos interativos de alta fidelidade, sistemas de design UI/UX e experiência do usuário focada no produto.', imgUrl: null },
-//         { key: 'AWS', name: 'AWS', desc: 'Arquitetura Serverless em nuvem, configuração de Buckets S3, distribuições CloudFront e esteiras de CI/CD.', imgUrl: null }
-//     ],
-//     content: {
-//         name: ' ',
-//         bio: 'Arquiteto de Nuvem & Desenvolvedor Full Stack apaixonado por criar portfólios elegantes usando tecnologia de ponta na AWS.',
-//         avatar: ''
-//     },
-//     sections: {
-//         about: true,
-//         skills: true,
-//         certs: true
-//     },
-//     skills: ['JavaScript', 'TypeScript', 'Vite', 'React', 'HTML', 'CSS', 'Node.js', 'AWS S3', 'CloudFront'],
-//     certs: [
-//         { name: 'AWS Cloud Practitioner', type: 'PDF', topic: 'AWS' },
-//         { name: 'AWS Solutions Architect', type: 'PDF', topic: 'AWS' },
-//         { name: 'Developer Associate', type: 'IMG', topic: 'BACK' }
-//     ]
-// };
-
 const DEFAULT_STATE = {
-    portfolioId: '', // Começa vazio para gerar um novo ao salvar
+    portfolioId: '',
     template: 'wireframe',
     primaryColor: '#f59e0b',
-    name: 'Seu Nome Aqui',
-    title: 'Desenvolvedor(a) de Software',
-    bio: 'Bem-vindo ao seu novo portfólio! Use este espaço para escrever um breve resumo sobre você, suas principais habilidades, experiências e seus objetivos profissionais.',
-    avatarUrl: '', // Deixe vazio para o avatar padrão, ou coloque a URL de um ícone genérico
-    socialLinks: {
-        github: 'https://github.com/seu-usuario',
-        linkedin: 'https://linkedin.com/in/seu-usuario',
-        email: 'seu-email@exemplo.com'
+    bgColor: '#0f172a',
+    textColor: '#f1f5f9',
+    fontFamily: "'Inter', sans-serif",
+    fontScale: '1.0',
+    cardRadius: '12px',
+    activeTopic: 'FRONT',
+    topics: [
+        { key: 'FRONT', name: 'Especialidade 1', desc: 'Descreva aqui as suas principais habilidades, ferramentas utilizadas e experiências relacionadas a esta área de atuação.', imgUrl: null },
+        { key: 'BACK', name: 'Especialidade 2', desc: 'Use este espaço para detalhar seus conhecimentos técnicos, metodologias ou projetos de destaque neste tópico.', imgUrl: null },
+        { key: 'DESIGN', name: 'Especialidade 3', desc: 'Explique sua proficiência, histórico profissional e como você aplica esses conhecimentos na prática.', imgUrl: null },
+        { key: 'AWS', name: 'Especialidade 4', desc: 'Destaque competências adicionais, ferramentas específicas ou diferenciais que complementam o seu perfil.', imgUrl: null }
+    ],
+    content: {
+        name: 'Seu Nome e Sobrenome',
+        bio: 'Breve resumo profissional. Use este espaço para descrever quem você é, sua trajetória, suas principais competências e seus objetivos de carreira.',
+        avatar: ''
     },
-    experience: [
-        {
-            id: 'exp-1',
-            role: 'Cargo ou Função',
-            company: 'Nome da Empresa',
-            period: 'Jan 2023 - Presente',
-            description: 'Descreva aqui as suas principais responsabilidades, tecnologias utilizadas e as conquistas que teve neste cargo.'
-        }
-    ],
-    projects: [
-        {
-            id: 'proj-1',
-            title: 'Nome do seu Projeto',
-            description: 'Uma breve descrição do que este projeto faz, qual problema ele resolve e quais tecnologias foram aplicadas.',
-            techStack: ['JavaScript', 'HTML/CSS', 'AWS'],
-            link: '#'
-        },
-        {
-            id: 'proj-2',
-            title: 'Outro Projeto Incrível',
-            description: 'Detalhes sobre outro projeto importante do seu portfólio para destacar sua versatilidade.',
-            techStack: ['React', 'Node.js'],
-            link: '#'
-        }
-    ],
-    certifications: [
-        {
-            id: 'cert-1',
-            name: 'Nome da Certificação ou Curso',
-            issuer: 'Instituição de Ensino',
-            year: '2024'
-        }
+    sections: {
+        about: true,
+        skills: true,
+        certs: true
+    },
+    skills: ['Competência 1', 'Competência 2', 'Competência 3', 'Competência 4', 'Competência 5', 'Competência 6'],
+    certs: [
+        { name: 'Nome da Certificação ou Curso 1', type: 'PDF', topic: 'AWS' },
+        { name: 'Nome da Certificação ou Curso 2', type: 'PDF', topic: 'AWS' },
+        { name: 'Nome do Projeto ou Prêmio', type: 'IMG', topic: 'BACK' }
     ]
 };
-
 const API_URL = 'https://h26oarm1s7.execute-api.us-east-2.amazonaws.com';
 
 let state = JSON.parse(JSON.stringify(DEFAULT_STATE));
