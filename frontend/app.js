@@ -47,7 +47,7 @@ let isReadOnly = false;
 window.onload = async function() {
     const params = new URLSearchParams(window.location.search);
     const userId = params.get('user');
-    const savedId = localStorage.getItem('meuPortfolioId'); 
+    const savedId = localStorage.getItem('meuPortfolioId'); ``
 
     if (userId) {
         isReadOnly = true;
@@ -549,67 +549,55 @@ function promptAddCert() {
     document.getElementById('cert-file-input').click();
 }
 
-function loadCertFile(event) {
+// Certificados (PDF/Imagens)
+async function loadCertFile(event) {
     const file = event.target.files[0];
     if (!file) return;
 
     const name = prompt('Digite o nome deste certificado:');
     if (!name || name.trim() === '') {
-        event.target.value = ''; 
+        event.target.value = '';
         return;
     }
 
-    const reader = new FileReader();
-    reader.onload = async function(e) {
+    try {
         const isPDF = file.type === 'application/pdf';
-        const fileBase64 = e.target.result;
-        
-        let thumbnailUrl = fileBase64; // Se for imagem, a thumbnail é a própria imagem
+        let thumbnailUrl = null;
 
         if (isPDF) {
             try {
-                // Remove o cabeçalho do base64 (data:application/pdf;base64,) para o PDF.js
-                const base64Data = fileBase64.split(',')[1];
-                const pdfData = atob(base64Data);
-                const uint8Array = new Uint8Array(pdfData.length);
-                for (let i = 0; i < pdfData.length; i++) {
-                    uint8Array[i] = pdfData.charCodeAt(i);
-                }
-
-                // Carrega o PDF e extrai a página 1
-                const pdf = await pdfjsLib.getDocument({ data: uint8Array }).promise;
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise; //
                 const page = await pdf.getPage(1);
-                
-                // Cria um canvas temporário para desenhar a página
-                const viewport = page.getViewport({ scale: 0.25 }); // Escala reduzida para ficar leve
+                const viewport = page.getViewport({ scale: 0.25 });
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d');
                 canvas.height = viewport.height;
                 canvas.width = viewport.width;
 
-                // Renderiza e converte para imagem JPG
                 await page.render({ canvasContext: context, viewport: viewport }).promise;
                 thumbnailUrl = canvas.toDataURL('image/jpeg', 0.4);
-            } catch (error) {
-                console.error("Erro ao gerar capa do PDF:", error);
-                thumbnailUrl = null; // Falha silenciosa, cai para o ícone padrão
+            } catch (e) {
+                console.error("Erro na thumbnail:", e);
             }
         }
-        
-        // Salva o certificado com a URL do arquivo E a URL da miniatura
-        state.certs.push({ 
-            name: name.trim(), 
+
+        const s3Url = await uploadFileToS3(file, 'certs');
+
+        state.certs.push({
+            name: name.trim(),
             type: isPDF ? 'PDF' : 'IMG',
-            url: fileBase64,
-            thumbnailUrl: thumbnailUrl,
-            topic: state.activeTopic // <-- Salva a Area atual junto com o certificado!
+            url: s3Url,
+            thumbnailUrl: isPDF ? thumbnailUrl : s3Url,
+            topic: state.activeTopic
         });
-        
+
         renderPortfolio();
-    };
-    
-    reader.readAsDataURL(file);
-    event.target.value = ''; 
+    } catch (err) {
+        alert("Erro ao enviar certificado: " + err.message);
+    } finally {
+        event.target.value = '';
+    }
 }
 
 function removeCert(name) {
@@ -621,18 +609,21 @@ function triggerAvatarUpload() {
     document.getElementById('avatar-file-input').click();
 }
 
-function loadAvatar(event) {
+// Avatar / Foto de Perfil
+async function loadAvatar(event) {
     const file = event.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            state.content.avatar = e.target.result;
-            const img = document.getElementById('avatar-image');
-            img.src = e.target.result;
-            img.classList.remove('hidden');
-            renderPortfolio();
-        };
-        reader.readAsDataURL(file);
+    if (!file) return;
+
+    try {
+        const img = document.getElementById('avatar-image');
+        img.src = URL.createObjectURL(file); // Preview rápido
+        img.classList.remove('hidden');
+
+        const s3Url = await uploadFileToS3(file, 'avatars');
+        state.content.avatar = s3Url;
+        renderPortfolio();
+    } catch (err) {
+        alert("Erro no upload do avatar: " + err.message);
     }
 }
 
@@ -640,20 +631,22 @@ function triggerTopicImageUpload() {
     document.getElementById('topic-image-input').click();
 }
 
-function loadTopicImage(event) {
+// Imagem da Área / Tópico
+async function loadTopicImage(event) {
     const file = event.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const activeKey = state.activeTopic.toUpperCase();
-            const topicIndex = state.topics.findIndex((t) => t.key.toUpperCase() === activeKey);
+    if (!file) return;
 
-            if (topicIndex !== -1) {
-                state.topics[topicIndex].imgUrl = e.target.result;
-                renderPortfolio();
-            }
-        };
-        reader.readAsDataURL(file);
+    try {
+        const activeKey = state.activeTopic.toUpperCase();
+        const topicIndex = state.topics.findIndex((t) => t.key.toUpperCase() === activeKey);
+
+        if (topicIndex !== -1) {
+            const s3Url = await uploadFileToS3(file, 'topics');
+            state.topics[topicIndex].imgUrl = s3Url;
+            renderPortfolio();
+        }
+    } catch (err) {
+        alert("Erro no upload da imagem da área: " + err.message);
     }
 }
 
@@ -850,3 +843,41 @@ function startAutoSave(intervalSeconds = 2) {
     }, intervalSeconds * 1000);
 }
 
+async function uploadFileToS3(file, folder = 'misc') {
+    if (!state.portfolioId) {
+        state.portfolioId = (typeof crypto !== 'undefined' && crypto.randomUUID) 
+            ? crypto.randomUUID() 
+            : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+                const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+    }
+
+    // 1. Pede a URL presigned enviando a flag action ou pela rota /upload-url
+    const response = await fetch(API_URL + '/portfolio', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            action: 'getUploadUrl',
+            portfolioId: state.portfolioId,
+            fileName: file.name,
+            fileType: file.type,
+            folder: folder
+        })
+    });
+
+    if (!response.ok) throw new Error('Falha ao obter permissão de upload');
+
+    const { uploadUrl, filePublicUrl } = await response.json();
+
+    // 2. Envia o arquivo diretamente para o Amazon S3
+    const uploadRes = await fetch(uploadUrl, {
+        method: 'PUT',
+        headers: { 'Content-Type': file.type },
+        body: file
+    });
+
+    if (!uploadRes.ok) throw new Error('Erro ao transferir arquivo para o S3');
+
+    return filePublicUrl;
+}
