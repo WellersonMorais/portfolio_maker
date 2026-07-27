@@ -842,7 +842,6 @@ function startAutoSave(intervalSeconds = 2) {
         }
     }, intervalSeconds * 1000);
 }
-
 async function uploadFileToS3(file, folder = 'misc') {
     if (!state.portfolioId) {
         state.portfolioId = (typeof crypto !== 'undefined' && crypto.randomUUID) 
@@ -853,9 +852,7 @@ async function uploadFileToS3(file, folder = 'misc') {
             });
     }
 
-    const fileType = file.type || 'image/png';
-
-    // 1. Pede a URL presigned
+    // 1. Pede a Presigned URL para a Lambda
     const response = await fetch(API_URL + '/portfolio', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -863,7 +860,6 @@ async function uploadFileToS3(file, folder = 'misc') {
             action: 'getUploadUrl',
             portfolioId: state.portfolioId,
             fileName: file.name,
-            fileType: fileType,
             folder: folder
         })
     });
@@ -872,12 +868,9 @@ async function uploadFileToS3(file, folder = 'misc') {
 
     const { uploadUrl, filePublicUrl } = await response.json();
 
-    // 2. Envia exatamente o mesmo Content-Type assinado
+    // 2. Envia o arquivo puro para o S3 (SEM passar objeto headers)
     const uploadRes = await fetch(uploadUrl, {
         method: 'PUT',
-        headers: {
-            'Content-Type': fileType
-        },
         body: file
     });
 
