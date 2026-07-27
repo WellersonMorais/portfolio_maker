@@ -843,13 +843,14 @@ async function uploadFileToS3(file, folder = 'misc') {
 
     const { uploadUrl, filePublicUrl } = await response.json();
 
-    // 2. Converte o File para ArrayBuffer antes do envio
-    // Isso impede que o browser adicione o Content-Type: image/png automaticamente!
+    // 2. Converte para buffer binário puro
     const arrayBuffer = await file.arrayBuffer();
 
+    // 3. Envio direto via PUT com modo CORS explícito
     const uploadRes = await fetch(uploadUrl, {
         method: 'PUT',
-        body: arrayBuffer // Envia o buffer binário bruto
+        mode: 'cors',
+        body: arrayBuffer
     });
 
     if (!uploadRes.ok) throw new Error('Erro ao transferir arquivo para o S3');
