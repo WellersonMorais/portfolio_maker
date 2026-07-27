@@ -40,21 +40,32 @@ let isReadOnly = false;
 window.onload = async function() {
     const params = new URLSearchParams(window.location.search);
     const userId = params.get('user');
+    
+    // Verifica se o usuário tem um portfólio salvo na máquina dele
+    const savedId = localStorage.getItem('meuPortfolioId'); 
 
     if (userId) {
-        // 1. OCULTA O PAINEL IMEDIATAMENTE ANTES DE CARREGAR A API
+        // MODO PÚBLICO (Visitante acessou via link compartilhado)
         isReadOnly = true;
         isPreviewMode = true;
         updatePreviewModeUI();
 
         try {
-            // 2. Agora ele busca os dados na AWS com a tela já limpa
             await loadPortfolioFromCloud(userId);
         } catch (e) {
-            console.error('Erro ao carregar portfólio da API', e);
+            console.error('Erro ao carregar portfólio', e);
+            state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+        }
+    } else if (savedId) {
+        // MODO EDIÇÃO (O dono voltou ao site principal)
+        try {
+            await loadPortfolioFromCloud(savedId);
+            // Não bloqueamos a tela, o painel de edição continua aberto!
+        } catch (e) {
             state = JSON.parse(JSON.stringify(DEFAULT_STATE));
         }
     } else {
+        // NOVO USUÁRIO (Nenhum link e nenhuma memória)
         state = JSON.parse(JSON.stringify(DEFAULT_STATE));
     }
     
@@ -603,6 +614,8 @@ async function savePortfolioToCloud() {
         if (!response.ok) throw new Error(responseText || 'Falha ao salvar no backend');
         
         alert('Portfólio salvo com sucesso! Agora você pode gerar o seu link de compartilhamento.');
+        // SALVA O ID NA MEMÓRIA DO NAVEGADOR
+        localStorage.setItem('meuPortfolioId', state.portfolioId);
     } catch (error) {
         console.error('Erro de comunicação:', error);
         alert('Falha ao tentar salvar na nuvem: ' + error.message);

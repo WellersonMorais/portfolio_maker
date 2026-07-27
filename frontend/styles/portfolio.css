@@ -11,8 +11,8 @@
 }
 
 .avatar-frame {
-    width: 80px;
-    height: 80px;
+    width: 100px;
+    height: 100px;
     border-radius: calc(var(--card-radius) * 1.2);
     overflow: hidden;
     border: 2px solid var(--primary-color);
