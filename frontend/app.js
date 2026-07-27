@@ -853,7 +853,7 @@ async function uploadFileToS3(file, folder = 'misc') {
             });
     }
 
-    // 1. Pede a URL presigned enviando a flag action ou pela rota /upload-url
+    // 1. Pede a URL presigned enviando a flag action para o seu endpoint /portfolio
     const response = await fetch(API_URL + '/portfolio', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -870,13 +870,10 @@ async function uploadFileToS3(file, folder = 'misc') {
 
     const { uploadUrl, filePublicUrl } = await response.json();
 
-    // 2. Envia o arquivo diretamente para o Amazon S3    
+    // 2. Envia o arquivo diretamente para o Amazon S3 sem assinar headers extras
     const uploadRes = await fetch(uploadUrl, {
         method: 'PUT',
-        headers: { 
-            'Content-Type': file.type 
-        },
-        body: file
+        body: file // Envia diretamente o arquivo bruto
     });
 
     if (!uploadRes.ok) throw new Error('Erro ao transferir arquivo para o S3');
