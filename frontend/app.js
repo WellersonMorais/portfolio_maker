@@ -577,18 +577,10 @@ function updatePreviewModeUI() {
 async function savePortfolioToCloud() {
     const btn = document.querySelector('button[onclick="savePortfolioToCloud()"]');
     
-    // Pede a senha antes de fazer qualquer coisa
-    const pass = prompt("Digite a senha de administrador para salvar as alterações:");
-    if (!pass) {
-        alert("Salvamento cancelado.");
-        return;
-    }
-
     try {
         if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...';
-        if (!API_URL) throw new Error('API_URL ainda não foi configurada.');
+        if (!API_URL) throw new Error('API_URL não configurada.');
 
-        // Gera um ID único compatível com qualquer ambiente (file:// ou https://)
         if (!state.portfolioId) {
             state.portfolioId = (typeof crypto !== 'undefined' && crypto.randomUUID) 
                 ? crypto.randomUUID() 
@@ -598,12 +590,11 @@ async function savePortfolioToCloud() {
                 });
         }
 
-        // Envia os dados e a senha (Token) para o Lambda
+        // Requisição SEM o header de Authorization
         const response = await fetch(API_URL + '/portfolio', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${pass}`
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify(state)
         });
@@ -611,7 +602,7 @@ async function savePortfolioToCloud() {
         const responseText = await response.text();
         if (!response.ok) throw new Error(responseText || 'Falha ao salvar no backend');
         
-        alert('Portfólio salvo na Nuvem com sucesso!');
+        alert('Portfólio salvo com sucesso! Agora você pode gerar o seu link de compartilhamento.');
     } catch (error) {
         console.error('Erro de comunicação:', error);
         alert('Falha ao tentar salvar na nuvem: ' + error.message);
