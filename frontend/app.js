@@ -47,12 +47,9 @@ let isReadOnly = false;
 window.onload = async function() {
     const params = new URLSearchParams(window.location.search);
     const userId = params.get('user');
-    
-    // Recupera o ID do criador
     const savedId = localStorage.getItem('meuPortfolioId'); 
 
     if (userId) {
-        // MODO PÚBLICO (Visitante acessou via link compartilhado)
         isReadOnly = true;
         isPreviewMode = true;
         updatePreviewModeUI();
@@ -60,59 +57,130 @@ window.onload = async function() {
         try {
             await loadPortfolioFromCloud(userId);
         } catch (e) {
-            console.error('Erro ao carregar portfólio público:', e);
             state = JSON.parse(JSON.stringify(DEFAULT_STATE));
         }
     } else if (savedId) {
-        // MODO EDIÇÃO (O Criador atualizou a página)
         try {
-            // 1. Tenta carregar primeiro o rascunho local mais recente
+            // Tenta carregar o rascunho salvo no navegador primeiro
             const localDraft = localStorage.getItem('draft_portfolio_' + savedId);
-            
             if (localDraft) {
-                state = JSON.parse(localDraft); // Restaura exatamente de onde parou antes do F5!
+                state = JSON.parse(localDraft);
             } else {
-                await loadPortfolioFromCloud(savedId); // Se não houver rascunho local, busca da nuvem
+                await loadPortfolioFromCloud(savedId);
             }
         } catch (e) {
-            console.error('Erro ao carregar dados locais:', e);
             state = JSON.parse(JSON.stringify(DEFAULT_STATE));
         }
     } else {
-        // NOVO USUÁRIO
         state = JSON.parse(JSON.stringify(DEFAULT_STATE));
     }
     
     syncUIWithState();
     renderPortfolio();
 
-    // Inicia a gravação contínua no navegador
+    // 🚀 SALVA AUTOMATICAMENTE NO MOMENTO EXATO QUE O USUÁRIO DÁ F5 OU FECHA A ABA
+    window.addEventListener('beforeunload', function() {
+        if (!isReadOnly && state.portfolioId) {
+            localStorage.setItem('meuPortfolioId', state.portfolioId);
+            localStorage.setItem('draft_portfolio_' + state.portfolioId, JSON.stringify(state));
+        }
+    });
+
     startAutoSave(2);
 };
 
 function syncUIWithState() {
-    document.getElementById('primary-color').value = state.primaryColor;
-    document.getElementById('primary-color-text').value = state.primaryColor;
-    document.getElementById('bg-color').value = state.bgColor;
-    document.getElementById('bg-color-text').value = state.bgColor;
-    document.getElementById('text-color').value = state.textColor || '#f1f5f9';
-    document.getElementById('text-color-text').value = state.textColor || '#f1f5f9';
+    // Inputs de Cores
+    const primaryColorInput = document.getElementById('primary-color');
+    const primaryColorText = document.getElementById('primary-color-text');
+    if (primaryColorInput) {
+        primaryColorInput.value = state.primaryColor;
+        primaryColorInput.oninput = (e) => updateStyleVar('--primary-color', e.target.value);
+    }
+    if (primaryColorText) {
+        primaryColorText.value = state.primaryColor;
+        primaryColorText.oninput = (e) => updateStyleVar('--primary-color', e.target.value);
+    }
 
-    document.getElementById('font-family-select').value = state.fontFamily;
-    document.getElementById('font-scale').value = state.fontScale;
-    document.getElementById('border-radius').value = parseInt(state.cardRadius);
+    const bgColorInput = document.getElementById('bg-color');
+    const bgColorText = document.getElementById('bg-color-text');
+    if (bgColorInput) {
+        bgColorInput.value = state.bgColor;
+        bgColorInput.oninput = (e) => updateStyleVar('--bg-color', e.target.value);
+    }
+    if (bgColorText) {
+        bgColorText.value = state.bgColor;
+        bgColorText.oninput = (e) => updateStyleVar('--bg-color', e.target.value);
+    }
 
-    document.getElementById('content-name').value = state.content.name;
-    document.getElementById('content-bio').value = state.content.bio;
+    const textColorInput = document.getElementById('text-color');
+    const textColorText = document.getElementById('text-color-text');
+    if (textColorInput) {
+        textColorInput.value = state.textColor || '#f1f5f9';
+        textColorInput.oninput = (e) => updateStyleVar('--text-color', e.target.value);
+    }
+    if (textColorText) {
+        textColorText.value = state.textColor || '#f1f5f9';
+        textColorText.oninput = (e) => updateStyleVar('--text-color', e.target.value);
+    }
 
-    document.getElementById('chk-sec-about').checked = state.sections.about;
-    document.getElementById('chk-sec-skills').checked = state.sections.skills;
-    document.getElementById('chk-sec-certs').checked = state.sections.certs;
+    // Inputs de Tipografia
+    const fontFamilySelect = document.getElementById('font-family-select');
+    if (fontFamilySelect) {
+        fontFamilySelect.value = state.fontFamily;
+        fontFamilySelect.onchange = (e) => updateStyleVar('--font-family', e.target.value);
+    }
+
+    const fontScaleInput = document.getElementById('font-scale');
+    if (fontScaleInput) {
+        fontScaleInput.value = state.fontScale;
+        fontScaleInput.oninput = (e) => updateStyleVar('--font-scale', e.target.value);
+    }
+
+    const borderRadiusInput = document.getElementById('border-radius');
+    if (borderRadiusInput) {
+        borderRadiusInput.value = parseInt(state.cardRadius);
+        borderRadiusInput.oninput = (e) => updateStyleVar('--card-radius', e.target.value + 'px');
+    }
+
+    // 🚀 AQUI ESTÁ O SEGREDO: Conecta os campos de Nome e Bio com o state
+    const nameInput = document.getElementById('content-name');
+    if (nameInput) {
+        nameInput.value = state.content.name;
+        nameInput.oninput = (e) => updateContent('name', e.target.value);
+    }
+
+    const bioInput = document.getElementById('content-bio');
+    if (bioInput) {
+        bioInput.value = state.content.bio;
+        bioInput.oninput = (e) => updateContent('bio', e.target.value);
+    }
+
+    // Checkboxes de Seção
+    const chkAbout = document.getElementById('chk-sec-about');
+    if (chkAbout) {
+        chkAbout.checked = state.sections.about;
+        chkAbout.onchange = (e) => toggleSection('about', e.target.checked);
+    }
+
+    const chkSkills = document.getElementById('chk-sec-skills');
+    if (chkSkills) {
+        chkSkills.checked = state.sections.skills;
+        chkSkills.onchange = (e) => toggleSection('skills', e.target.checked);
+    }
+
+    const chkCerts = document.getElementById('chk-sec-certs');
+    if (chkCerts) {
+        chkCerts.checked = state.sections.certs;
+        chkCerts.onchange = (e) => toggleSection('certs', e.target.checked);
+    }
 
     if (state.content.avatar) {
         const img = document.getElementById('avatar-image');
-        img.src = state.content.avatar;
-        img.classList.remove('hidden');
+        if (img) {
+            img.src = state.content.avatar;
+            img.classList.remove('hidden');
+        }
     }
 
     renderEditorTopicsList();
