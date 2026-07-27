@@ -43,11 +43,14 @@ window.onload = async function() {
     const userId = params.get('user');
 
     if (userId) {
+        // 1. OCULTA O PAINEL IMEDIATAMENTE ANTES DE CARREGAR A API
+        isReadOnly = true;
+        isPreviewMode = true;
+        updatePreviewModeUI();
+
         try {
+            // 2. Agora ele busca os dados na AWS com a tela já limpa
             await loadPortfolioFromCloud(userId);
-            isReadOnly = true;
-            isPreviewMode = true;
-            updatePreviewModeUI();
         } catch (e) {
             console.error('Erro ao carregar portfólio da API', e);
             state = JSON.parse(JSON.stringify(DEFAULT_STATE));
@@ -55,10 +58,10 @@ window.onload = async function() {
     } else {
         state = JSON.parse(JSON.stringify(DEFAULT_STATE));
     }
-
+    
     syncUIWithState();
     renderPortfolio();
-};
+}
 
 function syncUIWithState() {
     document.getElementById('primary-color').value = state.primaryColor;
