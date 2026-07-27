@@ -15,7 +15,7 @@ const DEFAULT_STATE = {
         { key: 'AWS', name: 'AWS', desc: 'Arquitetura Serverless em nuvem, configuração de Buckets S3, distribuições CloudFront e esteiras de CI/CD.', imgUrl: null }
     ],
     content: {
-        name: 'Wellerson Morais',
+        name: ' ',
         bio: 'Arquiteto de Nuvem & Desenvolvedor Full Stack apaixonado por criar portfólios elegantes usando tecnologia de ponta na AWS.',
         avatar: ''
     },
