@@ -852,7 +852,7 @@ async function uploadFileToS3(file, folder = 'misc') {
             });
     }
 
-    // 1. Pede a Presigned URL para a Lambda
+    // 1. Pede a URL presigned para a Lambda
     const response = await fetch(API_URL + '/portfolio', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -868,10 +868,13 @@ async function uploadFileToS3(file, folder = 'misc') {
 
     const { uploadUrl, filePublicUrl } = await response.json();
 
-    // 2. Envia o arquivo puro para o S3 (SEM passar objeto headers)
+    // 2. Converte o File para ArrayBuffer antes do envio
+    // Isso impede que o browser adicione o Content-Type: image/png automaticamente!
+    const arrayBuffer = await file.arrayBuffer();
+
     const uploadRes = await fetch(uploadUrl, {
         method: 'PUT',
-        body: file
+        body: arrayBuffer // Envia o buffer binário bruto
     });
 
     if (!uploadRes.ok) throw new Error('Erro ao transferir arquivo para o S3');
