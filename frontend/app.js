@@ -870,10 +870,12 @@ async function uploadFileToS3(file, folder = 'misc') {
 
     const { uploadUrl, filePublicUrl } = await response.json();
 
-    // 2. Envia o arquivo diretamente para o Amazon S3
+    // 2. Envia o arquivo diretamente para o Amazon S3    
     const uploadRes = await fetch(uploadUrl, {
         method: 'PUT',
-        headers: { 'Content-Type': file.type },
+        headers: { 
+            'Content-Type': file.type 
+        },
         body: file
     });
 
