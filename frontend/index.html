@@ -188,6 +188,9 @@
                                     <button onclick="triggerAvatarUpload()" class="edit-control avatar-upload-btn" aria-label="Fazer upload do avatar">
                                         <i class="fa-solid fa-camera" aria-hidden="true"></i>
                                     </button>
+                                    <button id="avatar-remove-btn" onclick="removeAvatar()" class="edit-control avatar-remove-btn hidden" aria-label="Remover avatar">
+                                        <i class="fa-solid fa-trash" aria-hidden="true"></i>
+                                    </button>
                                     <input type="file" id="avatar-file-input" class="hidden" accept="image/*" onchange="loadAvatar(event)">
                                 </div>
                                 <div class="hero-copy">
@@ -244,6 +247,9 @@
 
                                 <button onclick="triggerTopicImageUpload()" class="edit-control illustration-upload-btn" aria-label="Upload de ilustração da Area">
                                     <i class="fa-solid fa-image" aria-hidden="true"></i>
+                                </button>
+                                <button id="topic-image-remove-btn" onclick="removeTopicImage()" class="edit-control illustration-remove-btn hidden" aria-label="Remover ilustração da Area">
+                                    <i class="fa-solid fa-trash" aria-hidden="true"></i>
                                 </button>
                                 <input type="file" id="topic-image-input" class="hidden" accept="image/*" onchange="loadTopicImage(event)">
 

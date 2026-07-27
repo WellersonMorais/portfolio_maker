@@ -175,12 +175,20 @@ function syncUIWithState() {
         chkCerts.onchange = (e) => toggleSection('certs', e.target.checked);
     }
 
-    if (state.content.avatar) {
-        const img = document.getElementById('avatar-image');
-        if (img) {
-            img.src = state.content.avatar;
-            img.classList.remove('hidden');
+    const avatarImg = document.getElementById('avatar-image');
+    if (avatarImg) {
+        if (state.content.avatar) {
+            avatarImg.src = state.content.avatar;
+            avatarImg.classList.remove('hidden');
+        } else {
+            avatarImg.src = '';
+            avatarImg.classList.add('hidden');
         }
+    }
+
+    const avatarRemoveBtn = document.getElementById('avatar-remove-btn');
+    if (avatarRemoveBtn) {
+        avatarRemoveBtn.classList.toggle('hidden', !state.content.avatar);
     }
 
     renderEditorTopicsList();
@@ -453,6 +461,9 @@ function renderCenterIllustration() {
             </div>
         `;
     }
+
+    const removeBtn = document.getElementById('topic-image-remove-btn');
+    if (removeBtn) removeBtn.classList.toggle('hidden', !activeTopicObj.imgUrl);
 }
 
 function updateStyleVar(variable, value) {
@@ -624,12 +635,30 @@ async function loadAvatar(event) {
             img.classList.remove('hidden');
         }
 
+        const removeBtn = document.getElementById('avatar-remove-btn');
+        if (removeBtn) removeBtn.classList.remove('hidden');
+
         // Salva a versão ultra leve no estado do app
         state.content.avatar = compressedBase64;
         renderPortfolio();
     } catch (err) {
         alert("Erro ao processar imagem de perfil: " + err.message);
     }
+}
+
+function removeAvatar() {
+    state.content.avatar = '';
+
+    const img = document.getElementById('avatar-image');
+    if (img) {
+        img.src = '';
+        img.classList.add('hidden');
+    }
+
+    const removeBtn = document.getElementById('avatar-remove-btn');
+    if (removeBtn) removeBtn.classList.add('hidden');
+
+    renderPortfolio();
 }
 
 function triggerTopicImageUpload() {
@@ -654,6 +683,17 @@ async function loadTopicImage(event) {
         alert("Erro ao processar imagem da área: " + err.message);
     }
 }
+
+function removeTopicImage() {
+    const activeKey = state.activeTopic.toUpperCase();
+    const topicIndex = state.topics.findIndex((t) => t.key.toUpperCase() === activeKey);
+
+    if (topicIndex !== -1) {
+        state.topics[topicIndex].imgUrl = null;
+        renderPortfolio();
+    }
+}
+
 function togglePreviewMode() {
     if (isReadOnly) return;
     isPreviewMode = !isPreviewMode;
@@ -683,6 +723,19 @@ function updatePreviewModeUI() {
 
     // Alterna a visibilidade baseada no modo atual
     toggleVisibility(isPreviewMode);
+
+    // Botões de remover imagem só aparecem se houver uma imagem para remover
+    if (!isPreviewMode) {
+        const avatarRemoveBtn = document.getElementById('avatar-remove-btn');
+        if (avatarRemoveBtn && !state.content.avatar) avatarRemoveBtn.classList.add('hidden');
+
+        const topicRemoveBtn = document.getElementById('topic-image-remove-btn');
+        if (topicRemoveBtn) {
+            const activeKey = (state.activeTopic || state.topics[0]?.key || 'FRONT').toUpperCase();
+            const activeTopicObj = state.topics.find((t) => t.key.toUpperCase() === activeKey) || state.topics[0];
+            if (!activeTopicObj?.imgUrl) topicRemoveBtn.classList.add('hidden');
+        }
+    }
 
     // Usa um 'if' curto apenas para alterar o ícone/texto, se eles existirem no HTML
     if (icon) icon.className = isPreviewMode ? 'fa-solid fa-pen-to-square' : 'fa-solid fa-eye-slash';
