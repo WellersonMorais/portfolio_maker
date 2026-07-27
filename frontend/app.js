@@ -286,8 +286,6 @@ if (!isReadOnly) {
         }
         certsGrid.appendChild(certCard);
     });
-
-    updateURLDisplay();
 }
 
 function promptAddTopic() {
