@@ -621,18 +621,25 @@ function triggerAvatarUpload() {
     document.getElementById('avatar-file-input').click();
 }
 
-function loadAvatar(event) {
+async function loadAvatar(event) {
     const file = event.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            state.content.avatar = e.target.result;
-            const img = document.getElementById('avatar-image');
-            img.src = e.target.result;
+    if (!file) return;
+
+    try {
+        // Comprime a foto de perfil para no máximo 400x400px e 70% de qualidade
+        const compressedBase64 = await compressImage(file, 400, 400, 0.7);
+
+        const img = document.getElementById('avatar-image');
+        if (img) {
+            img.src = compressedBase64;
             img.classList.remove('hidden');
-            renderPortfolio();
-        };
-        reader.readAsDataURL(file);
+        }
+
+        // Salva a versão ultra leve no estado do app
+        state.content.avatar = compressedBase64;
+        renderPortfolio();
+    } catch (err) {
+        alert("Erro ao processar imagem de perfil: " + err.message);
     }
 }
 
@@ -640,20 +647,22 @@ function triggerTopicImageUpload() {
     document.getElementById('topic-image-input').click();
 }
 
-function loadTopicImage(event) {
+async function loadTopicImage(event) {
     const file = event.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const activeKey = state.activeTopic.toUpperCase();
-            const topicIndex = state.topics.findIndex((t) => t.key.toUpperCase() === activeKey);
+    if (!file) return;
 
-            if (topicIndex !== -1) {
-                state.topics[topicIndex].imgUrl = e.target.result;
-                renderPortfolio();
-            }
-        };
-        reader.readAsDataURL(file);
+    try {
+        const activeKey = state.activeTopic.toUpperCase();
+        const topicIndex = state.topics.findIndex((t) => t.key.toUpperCase() === activeKey);
+
+        if (topicIndex !== -1) {
+            // Comprime para no máximo 800x800px
+            const compressedBase64 = await compressImage(file, 800, 800, 0.7);
+            state.topics[topicIndex].imgUrl = compressedBase64;
+            renderPortfolio();
+        }
+    } catch (err) {
+        alert("Erro ao processar imagem da área: " + err.message);
     }
 }
 
@@ -859,5 +868,59 @@ function startAutoSave(intervalSeconds = 2) {
             console.warn('Erro ao salvar rascunho local:', e);
         }
     }, intervalSeconds * 1000);
+}
+
+/**
+ * Redimensiona e comprime uma imagem no navegador antes de salvar no estado.
+ * @param {File} file - Arquivo de imagem vindo do <input type="file">
+ * @param {number} maxWidth - Largura máxima permitida (ex: 800px)
+ * @param {number} maxHeight - Altura máxima permitida (ex: 800px)
+ * @param {number} quality - Qualidade da compressão de 0.1 a 1.0 (ex: 0.7 = 70%)
+ * @returns {Promise<string>} Retorna a imagem em Base64 super leve
+ */
+function compressImage(file, maxWidth = 800, maxHeight = 800, quality = 0.7) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+
+        reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target.result;
+
+            img.onload = () => {
+                let width = img.width;
+                let height = img.height;
+
+                // Mantém a proporção da imagem (Aspect Ratio)
+                if (width > height) {
+                    if (width > maxWidth) {
+                        height = Math.round((height * maxWidth) / width);
+                        width = maxWidth;
+                    }
+                } else {
+                    if (height > maxHeight) {
+                        width = Math.round((width * maxHeight) / height);
+                        height = maxHeight;
+                    }
+                }
+
+                // Desenha a imagem no Canvas com as novas dimensões
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // Exporta a imagem comprimida em formato JPEG leve
+                const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+                resolve(compressedBase64);
+            };
+
+            img.onerror = (error) => reject(error);
+        };
+
+        reader.onerror = (error) => reject(error);
+    });
 }
 
