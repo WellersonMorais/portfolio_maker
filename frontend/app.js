@@ -853,7 +853,7 @@ async function uploadFileToS3(file, folder = 'misc') {
             });
     }
 
-    const fileType = file.type || 'application/octet-stream';
+    const fileType = file.type || 'image/png';
 
     // 1. Pede a URL presigned
     const response = await fetch(API_URL + '/portfolio', {
@@ -863,7 +863,7 @@ async function uploadFileToS3(file, folder = 'misc') {
             action: 'getUploadUrl',
             portfolioId: state.portfolioId,
             fileName: file.name,
-            fileType: fileType, // Envia o tipo exato
+            fileType: fileType,
             folder: folder
         })
     });
@@ -872,7 +872,7 @@ async function uploadFileToS3(file, folder = 'misc') {
 
     const { uploadUrl, filePublicUrl } = await response.json();
 
-    // 2. Envia para o S3 com o MESMO Content-Type assinado
+    // 2. Envia exatamente o mesmo Content-Type assinado
     const uploadRes = await fetch(uploadUrl, {
         method: 'PUT',
         headers: {
