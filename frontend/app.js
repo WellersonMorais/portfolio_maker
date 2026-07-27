@@ -503,7 +503,7 @@ function loadCertFile(event) {
                 const page = await pdf.getPage(1);
                 
                 // Cria um canvas temporário para desenhar a página
-                const viewport = page.getViewport({ scale: 0.5 }); // Escala reduzida para ficar leve
+                const viewport = page.getViewport({ scale: 0.25 }); // Escala reduzida para ficar leve
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d');
                 canvas.height = viewport.height;
@@ -511,7 +511,7 @@ function loadCertFile(event) {
 
                 // Renderiza e converte para imagem JPG
                 await page.render({ canvasContext: context, viewport: viewport }).promise;
-                thumbnailUrl = canvas.toDataURL('image/jpeg', 0.8);
+                thumbnailUrl = canvas.toDataURL('image/jpeg', 0.4);
             } catch (error) {
                 console.error("Erro ao gerar capa do PDF:", error);
                 thumbnailUrl = null; // Falha silenciosa, cai para o ícone padrão
