@@ -47,12 +47,10 @@ let isReadOnly = false;
 window.onload = async function() {
     const params = new URLSearchParams(window.location.search);
     const userId = params.get('user');
-    
-    // Verifica se o usuário tem um portfólio salvo na máquina dele
     const savedId = localStorage.getItem('meuPortfolioId'); 
 
     if (userId) {
-        // MODO PÚBLICO (Visitante acessou via link compartilhado)
+        // MODO PÚBLICO
         isReadOnly = true;
         isPreviewMode = true;
         updatePreviewModeUI();
@@ -64,20 +62,27 @@ window.onload = async function() {
             state = JSON.parse(JSON.stringify(DEFAULT_STATE));
         }
     } else if (savedId) {
-        // MODO EDIÇÃO (O dono voltou ao site principal)
+        // MODO EDIÇÃO
         try {
-            await loadPortfolioFromCloud(savedId);
-            // Não bloqueamos a tela, o painel de edição continua aberto!
+            // Carrega o rascunho local mais recente se existir
+            const localDraft = localStorage.getItem('draft_portfolio_' + savedId);
+            if (localDraft) {
+                state = JSON.parse(localDraft);
+            } else {
+                await loadPortfolioFromCloud(savedId);
+            }
         } catch (e) {
             state = JSON.parse(JSON.stringify(DEFAULT_STATE));
         }
     } else {
-        // NOVO USUÁRIO (Nenhum link e nenhuma memória)
         state = JSON.parse(JSON.stringify(DEFAULT_STATE));
     }
     
     syncUIWithState();
     renderPortfolio();
+
+    // 🚀 INICIA O AUTO-SAVE A CADA 5 SEGUNDOS
+    startAutoSave(5);
 }
 
 function syncUIWithState() {
@@ -740,5 +745,46 @@ function copyShareUrl() {
     navigator.clipboard.writeText(input.value).then(() => {
         document.getElementById('copy-success-msg').classList.remove('hidden');
     });
+}
+
+// Variável para controlar o timer do Auto-Save
+let autoSaveTimer = null;
+
+function startAutoSave(intervalSeconds = 5) {
+    // Não ativa o Auto-Save se estiver no modo de apenas leitura (visitante)
+    if (isReadOnly) return;
+
+    // Cancela qualquer timer anterior para evitar múltiplos processos rodando
+    if (autoSaveTimer) clearInterval(autoSaveTimer);
+
+    autoSaveTimer = setInterval(async () => {
+        try {
+            // 1. Garante que exista um ID gerado
+            if (!state.portfolioId) {
+                state.portfolioId = (typeof crypto !== 'undefined' && crypto.randomUUID) 
+                    ? crypto.randomUUID() 
+                    : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                        var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+                        return v.toString(16);
+                    });
+            }
+
+            // 2. Salva o Rascunho Instantâneo no Navegador (Garante que F5 não perca nada)
+            localStorage.setItem('meuPortfolioId', state.portfolioId);
+            localStorage.setItem('draft_portfolio_' + state.portfolioId, JSON.stringify(state));
+
+            // 3. Atualiza um indicador visual silencioso de salvamento (opcional)
+            const editBadge = document.getElementById('edit-indicator');
+            if (editBadge) {
+                editBadge.innerHTML = '<i class="fa-solid fa-cloud-arrow-up fa-spin"></i> Salvo automaticamente';
+                setTimeout(() => {
+                    if (editBadge) editBadge.innerHTML = '<i class="fa-solid fa-circle-check"></i> Rascunho Salvo';
+                }, 1500);
+            }
+
+        } catch (e) {
+            console.warn('Falha no auto-save local:', e);
+        }
+    }, intervalSeconds * 1000);
 }
 
