@@ -47,10 +47,12 @@ let isReadOnly = false;
 window.onload = async function() {
     const params = new URLSearchParams(window.location.search);
     const userId = params.get('user');
+    
+    // Recupera o ID do criador
     const savedId = localStorage.getItem('meuPortfolioId'); 
 
     if (userId) {
-        // MODO PÚBLICO
+        // MODO PÚBLICO (Visitante acessou via link compartilhado)
         isReadOnly = true;
         isPreviewMode = true;
         updatePreviewModeUI();
@@ -58,32 +60,35 @@ window.onload = async function() {
         try {
             await loadPortfolioFromCloud(userId);
         } catch (e) {
-            console.error('Erro ao carregar portfólio', e);
+            console.error('Erro ao carregar portfólio público:', e);
             state = JSON.parse(JSON.stringify(DEFAULT_STATE));
         }
     } else if (savedId) {
-        // MODO EDIÇÃO
+        // MODO EDIÇÃO (O Criador atualizou a página)
         try {
-            // Carrega o rascunho local mais recente se existir
+            // 1. Tenta carregar primeiro o rascunho local mais recente
             const localDraft = localStorage.getItem('draft_portfolio_' + savedId);
+            
             if (localDraft) {
-                state = JSON.parse(localDraft);
+                state = JSON.parse(localDraft); // Restaura exatamente de onde parou antes do F5!
             } else {
-                await loadPortfolioFromCloud(savedId);
+                await loadPortfolioFromCloud(savedId); // Se não houver rascunho local, busca da nuvem
             }
         } catch (e) {
+            console.error('Erro ao carregar dados locais:', e);
             state = JSON.parse(JSON.stringify(DEFAULT_STATE));
         }
     } else {
+        // NOVO USUÁRIO
         state = JSON.parse(JSON.stringify(DEFAULT_STATE));
     }
     
     syncUIWithState();
     renderPortfolio();
 
-    // 🚀 INICIA O AUTO-SAVE A CADA 5 SEGUNDOS
-    startAutoSave(5);
-}
+    // Inicia a gravação contínua no navegador
+    startAutoSave(2);
+};
 
 function syncUIWithState() {
     document.getElementById('primary-color').value = state.primaryColor;
@@ -750,16 +755,14 @@ function copyShareUrl() {
 // Variável para controlar o timer do Auto-Save
 let autoSaveTimer = null;
 
-function startAutoSave(intervalSeconds = 5) {
-    // Não ativa o Auto-Save se estiver no modo de apenas leitura (visitante)
+function startAutoSave(intervalSeconds = 2) {
     if (isReadOnly) return;
 
-    // Cancela qualquer timer anterior para evitar múltiplos processos rodando
     if (autoSaveTimer) clearInterval(autoSaveTimer);
 
-    autoSaveTimer = setInterval(async () => {
+    autoSaveTimer = setInterval(() => {
         try {
-            // 1. Garante que exista um ID gerado
+            // Garante que exista um ID gerado
             if (!state.portfolioId) {
                 state.portfolioId = (typeof crypto !== 'undefined' && crypto.randomUUID) 
                     ? crypto.randomUUID() 
@@ -769,21 +772,12 @@ function startAutoSave(intervalSeconds = 5) {
                     });
             }
 
-            // 2. Salva o Rascunho Instantâneo no Navegador (Garante que F5 não perca nada)
+            // Grava a chave do criador e o estado completo no LocalStorage
             localStorage.setItem('meuPortfolioId', state.portfolioId);
             localStorage.setItem('draft_portfolio_' + state.portfolioId, JSON.stringify(state));
 
-            // 3. Atualiza um indicador visual silencioso de salvamento (opcional)
-            const editBadge = document.getElementById('edit-indicator');
-            if (editBadge) {
-                editBadge.innerHTML = '<i class="fa-solid fa-cloud-arrow-up fa-spin"></i> Salvo automaticamente';
-                setTimeout(() => {
-                    if (editBadge) editBadge.innerHTML = '<i class="fa-solid fa-circle-check"></i> Rascunho Salvo';
-                }, 1500);
-            }
-
         } catch (e) {
-            console.warn('Falha no auto-save local:', e);
+            console.warn('Erro ao salvar rascunho local:', e);
         }
     }, intervalSeconds * 1000);
 }
