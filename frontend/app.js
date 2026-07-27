@@ -549,7 +549,7 @@ function promptAddCert() {
     document.getElementById('cert-file-input').click();
 }
 
-function loadCertFile(event) {
+async function loadCertFile(event) {
     const file = event.target.files[0];
     if (!file) return;
 
@@ -559,59 +559,48 @@ function loadCertFile(event) {
         return;
     }
 
-    const reader = new FileReader();
-    reader.onload = async function(e) {
-        const isPDF = file.type === 'application/pdf';
-        const fileBase64 = e.target.result;
-        
-        let thumbnailUrl = fileBase64; // Se for imagem, a thumbnail é a própria imagem
+    const isPDF = file.type === 'application/pdf';
+
+    try {
+        let thumbnailUrl = null;
+        let fileBase64 = null;
 
         if (isPDF) {
-            try {
-                // Remove o cabeçalho do base64 (data:application/pdf;base64,) para o PDF.js
-                const base64Data = fileBase64.split(',')[1];
-                const pdfData = atob(base64Data);
-                const uint8Array = new Uint8Array(pdfData.length);
-                for (let i = 0; i < pdfData.length; i++) {
-                    uint8Array[i] = pdfData.charCodeAt(i);
-                }
+            // Processamento do PDF
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            const page = await pdf.getPage(1);
 
-                // Carrega o PDF e extrai a página 1
-                const pdf = await pdfjsLib.getDocument({ data: uint8Array }).promise;
-                const page = await pdf.getPage(1);
-                
-                // Cria um canvas temporário para desenhar a página
-                const viewport = page.getViewport({ scale: 0.25 }); // Escala reduzida para ficar leve
-                const canvas = document.createElement('canvas');
-                const context = canvas.getContext('2d');
-                canvas.height = viewport.height;
-                canvas.width = viewport.width;
+            const viewport = page.getViewport({ scale: 0.2 }); // Capa minúscula e ultra leve
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
 
-                // Renderiza e converte para imagem JPG
-                await page.render({ canvasContext: context, viewport: viewport }).promise;
-                thumbnailUrl = canvas.toDataURL('image/jpeg', 0.4);
-            } catch (error) {
-                console.error("Erro ao gerar capa do PDF:", error);
-                thumbnailUrl = null; // Falha silenciosa, cai para o ícone padrão
-            }
+            await page.render({ canvasContext: context, viewport: viewport }).promise;
+            thumbnailUrl = canvas.toDataURL('image/jpeg', 0.4);
+        } else {
+            // Se for imagem, comprime a imagem para no máximo 400x400
+            thumbnailUrl = await compressImage(file, 400, 400, 0.5);
+            fileBase64 = thumbnailUrl;
         }
-        
-        // Salva o certificado com a URL do arquivo E a URL da miniatura
+
         state.certs.push({ 
             name: name.trim(), 
             type: isPDF ? 'PDF' : 'IMG',
-            url: fileBase64,
+            url: fileBase64, // Pode ser nulo se for PDF para economizar espaço
             thumbnailUrl: thumbnailUrl,
-            topic: state.activeTopic // <-- Salva a Area atual junto com o certificado!
+            topic: state.activeTopic 
         });
-        
-        renderPortfolio();
-    };
-    
-    reader.readAsDataURL(file);
-    event.target.value = ''; 
-}
 
+        renderPortfolio();
+    } catch (error) {
+        console.error("Erro ao processar certificado:", error);
+        alert("Erro ao processar arquivo do certificado.");
+    } finally {
+        event.target.value = '';
+    }
+}
 function removeCert(name) {
     state.certs = state.certs.filter((c) => c.name !== name);
     renderPortfolio();
@@ -656,8 +645,8 @@ async function loadTopicImage(event) {
         const topicIndex = state.topics.findIndex((t) => t.key.toUpperCase() === activeKey);
 
         if (topicIndex !== -1) {
-            // Comprime para no máximo 800x800px
-            const compressedBase64 = await compressImage(file, 800, 800, 0.7);
+            // Reduz de 800px para 500px e qualidade 0.5 (ocupa em média ~15KB por área)
+            const compressedBase64 = await compressImage(file, 500, 500, 0.5);
             state.topics[topicIndex].imgUrl = compressedBase64;
             renderPortfolio();
         }
@@ -665,7 +654,6 @@ async function loadTopicImage(event) {
         alert("Erro ao processar imagem da área: " + err.message);
     }
 }
-
 function togglePreviewMode() {
     if (isReadOnly) return;
     isPreviewMode = !isPreviewMode;
@@ -724,33 +712,27 @@ async function savePortfolioToCloud() {
                 });
         }
 
-        // --- SOLUÇÃO RÁPIDA: Cria uma cópia limpando os arquivos gigantes antes de enviar ---
+        // Cria uma cópia para higienização
         const stateToSave = JSON.parse(JSON.stringify(state));
 
+        // Higieniza Certificados: descarta Base64 pesados deixando apenas as thumbnails leves
         if (stateToSave.certs && Array.isArray(stateToSave.certs)) {
             stateToSave.certs = stateToSave.certs.map(cert => {
-                // Se o arquivo/PDF for um Base64 grande (começa com data: e é maior que 50kb), 
-                // removemos a propriedade 'url' pesada e deixamos apenas a thumbnail leve
-                if (cert.url && cert.url.startsWith('data:') && cert.url.length > 50000) {
-                    return {
-                        name: cert.name,
-                        type: cert.type,
-                        topic: cert.topic,
-                        thumbnailUrl: cert.thumbnailUrl // Mantém a miniatura leve que você gerou!
-                    };
+                const cleanedCert = {
+                    name: cert.name,
+                    type: cert.type,
+                    topic: cert.topic,
+                    thumbnailUrl: cert.thumbnailUrl
+                };
+                // Se a URL for pequena (ex: link externo), mantém; se for um Base64 grande, remove
+                if (cert.url && !cert.url.startsWith('data:')) {
+                    cleanedCert.url = cert.url;
                 }
-                return cert;
+                return cleanedCert;
             });
         }
 
-        // Limpa também a foto de perfil/avatar caso seja uma imagem gigantesca
-        if (stateToSave.content && stateToSave.content.avatar && stateToSave.content.avatar.length > 200000) {
-            alert('Sua imagem de perfil é muito grande! Escolha uma imagem menor para conseguir salvar.');
-            if (btn) btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Salvar na Nuvem';
-            return;
-        }
-
-        // Faz o envio com o payload leve
+        // Faz o envio com payload ultra enxuto
         const response = await fetch(API_URL + '/portfolio', {
             method: 'POST',
             headers: {
@@ -771,6 +753,7 @@ async function savePortfolioToCloud() {
         if (btn) btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Salvar na Nuvem';
     }
 }
+
 function saveDraft() {
     return savePortfolioToCloud();
 }
