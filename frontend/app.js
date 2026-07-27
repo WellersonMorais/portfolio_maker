@@ -47,7 +47,7 @@ let isReadOnly = false;
 window.onload = async function() {
     const params = new URLSearchParams(window.location.search);
     const userId = params.get('user');
-    const savedId = localStorage.getItem('meuPortfolioId'); ``
+    const savedId = localStorage.getItem('meuPortfolioId');
 
     if (userId) {
         isReadOnly = true;
@@ -708,39 +708,13 @@ async function savePortfolioToCloud() {
                 });
         }
 
-        // --- SOLUÇÃO RÁPIDA: Cria uma cópia limpando os arquivos gigantes antes de enviar ---
-        const stateToSave = JSON.parse(JSON.stringify(state));
-
-        if (stateToSave.certs && Array.isArray(stateToSave.certs)) {
-            stateToSave.certs = stateToSave.certs.map(cert => {
-                // Se o arquivo/PDF for um Base64 grande (começa com data: e é maior que 50kb), 
-                // removemos a propriedade 'url' pesada e deixamos apenas a thumbnail leve
-                if (cert.url && cert.url.startsWith('data:') && cert.url.length > 50000) {
-                    return {
-                        name: cert.name,
-                        type: cert.type,
-                        topic: cert.topic,
-                        thumbnailUrl: cert.thumbnailUrl // Mantém a miniatura leve que você gerou!
-                    };
-                }
-                return cert;
-            });
-        }
-
-        // Limpa também a foto de perfil/avatar caso seja uma imagem gigantesca
-        if (stateToSave.content && stateToSave.content.avatar && stateToSave.content.avatar.length > 200000) {
-            alert('Sua imagem de perfil é muito grande! Escolha uma imagem menor para conseguir salvar.');
-            if (btn) btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Salvar na Nuvem';
-            return;
-        }
-
-        // Faz o envio com o payload leve
+        // O payload enviado agora é super leve porque contém apenas links/URLs do S3!
         const response = await fetch(API_URL + '/portfolio', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(stateToSave)
+            body: JSON.stringify(state)
         });
 
         const responseText = await response.text();
@@ -755,6 +729,7 @@ async function savePortfolioToCloud() {
         if (btn) btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Salvar na Nuvem';
     }
 }
+
 function saveDraft() {
     return savePortfolioToCloud();
 }
