@@ -779,16 +779,27 @@ async function loadPortfolioFromCloud(userId) {
         throw new Error('API_URL ainda não foi configurada.');
     }
 
+    console.log("Buscando portfólio do usuário:", userId);
     const response = await fetch(API_URL + '/portfolio?user=' + encodeURIComponent(userId));
+    
     if (!response.ok) {
-        throw new Error('Falha ao carregar o portfólio da API');
+        const errorText = await response.text();
+        throw new Error(`Falha na API (${response.status}): ${errorText}`);
     }
 
     const payload = await response.json();
-    if (payload && typeof payload === 'object') {
-        state = { ...DEFAULT_STATE, ...payload };
+    console.log("Dados recebidos da API:", payload);
+
+    // Ajuste para APIs AWS: Se o DynamoDB retornar dentro de { Item: {...} }, extraímos de lá.
+    // Caso venha uma Array, pegamos o primeiro elemento.
+    let data = payload;
+    if (payload.Item) data = payload.Item;
+    else if (Array.isArray(payload) && payload.length > 0) data = payload[0];
+
+    if (data && typeof data === 'object' && Object.keys(data).length > 0) {
+        state = { ...DEFAULT_STATE, ...data };
     } else {
-        state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+        throw new Error('A API retornou vazio ou num formato inesperado.');
     }
 }
 
